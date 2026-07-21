@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal AI Translator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: #0f1015;
+            color: #f1f1f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* App Header */
+        .header-bar {
+            width: 100%;
+            background: #161823;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .menu-btn {
+            font-size: 24px;
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            outline: none;
+        }
+        .header-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+        /* Sidebar Navigation Drawer */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -270px;
+            width: 260px;
+            height: 100%;
+            background: #181920;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.8);
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            padding-top: 20px;
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            left: 0;
+        }
+        .sidebar-header {
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #ffffff;
+            border-bottom: 1px solid #282a36;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-logo {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+        }
+        .sidebar-menu {
+            list-style: none;
+        }
+        .sidebar-menu li {
+            padding: 16px 20px;
+            font-size: 15px;
+            color: #b0b3c2;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+        .sidebar-menu li:hover, .sidebar-menu li.active {
+            background: #252734;
+            color: #ffffff;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            z-index: 999;
+            backdrop-filter: blur(3px);
+        }
+        .overlay.active {
+            display: block;
+        }
+
+        /* App Main Container */
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: #181920;
+            padding: 22px;
+            margin-top: 15px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Distinct Page Views */
+        .section-page {
+            display: none;
+        }
+        .section-page.active-page {
+            display: block;
+        }
+
+        label {
+            font-weight: 700;
+            font-size: 12px;
+            margin-top: 14px;
+            display: block;
+            color: #a0a0ab;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Clean Pop-up Trigger Button Style */
+        .lang-trigger-btn {
+            width: 100%;
+            padding: 13px 15px;
+            background: #222430;
+            color: #00f2fe; /* Pure Electric Cyan */
+            border: 1px solid #3e4259;
+            border-radius: 10px;
+            margin-top: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+            transition: border 0.2s;
+        }
+        .lang-trigger-btn:active {
+            border-color: #00f2fe;
+        }
+
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            background: #222430;
+            color: #ffffff;
+            border: 1px solid #323546;
+            border-radius: 10px;
+            margin-top: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+        textarea {
+            height: 90px;
+            resize: none;
+        }
+
+        /* Highlighting Result Box */
+        .result-box {
+            background: #222430;
+            border: 1px solid #3e4259;
+            padding: 14px;
+            border-radius: 10px;
+            min-height: 85px;
+            font-weight: 700;
+            font-size: 16px;
+            color: #00f2fe; /* Pure Electric Cyan */
+            word-wrap: break-word;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+            margin-top: 6px;
+        }
+
+        /* Animated Buttons */
+        .anim-btn {
+            position: relative;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #ffffff;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            letter-spacing: 0.5px;
+        }
+        .anim-btn:hover, .anim-btn:active {
+            transform: translateY(-2px) scale(1.01);
+        }
+
+        /* Buttons Colors */
+        .btn-mic-anim {
+            background: linear-gradient(135deg, #ff0050, #ff416c);
+            box-shadow: 0 4px 15px rgba(255, 0, 80, 0.4);
+        }
+        .btn-mic-anim.recording {
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            animation: pulseGlow 1.2s infinite alternate;
+        }
+
+        .btn-voice-listen {
+            background: linear-gradient(135deg, #8a2387, #e94057, #f27121);
+            box-shadow: 0 4px 15px rgba(233, 64, 87, 0.4);
+        }
+
+        .btn-text-translate {
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            box-shadow: 0 4px 15px rgba(78, 67, 118, 0.4);
+        }
+
+        .btn-text-listen {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+        }
+
+        .btn-donate-submit {
+            background: linear-gradient(135deg, #f12711, #f5af19);
+            box-shadow: 0 4px 15px rgba(245, 175, 25, 0.4);
+        }
+
+        .btn-report-submit {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            box-shadow: 0 4px 15px rgba(0, 114, 255, 0.4);
+        }
+
+        /* Donation Card Box Styles */
+        .donate-card {
+            background: #222430;
+            border: 1px solid #3e4259;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .donate-card-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #00f2fe;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .copy-btn-sm {
+            background: #252734;
+            color: #ffffff;
+            border: 1px solid #3e4259;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        /* POP-UP LANGUAGE SELECTION MODAL STYLING */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .lang-modal {
+            width: 100%;
+            max-width: 440px;
+            background: #181920;
+            border: 1px solid #3e4259;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 800;
+            font-size: 16px;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+        .close-modal-btn {
+            background: #252734;
+            border: none;
+            color: #aaa;
+            font-size: 18px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .modal-search {
+            width: 100%;
+            padding: 12px;
+            background: #222430;
+            color: #00f2fe;
+            border: 1px solid #323546;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 12px;
+        }
+        .lang-list-container {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 5px;
+        }
+        .lang-item {
+            padding: 12px 14px;
+            background: #222430;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            color: #f1f1f1;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .lang-item:hover, .lang-item.selected {
+            background: #00f2fe;
+            color: #0f1015;
+            font-weight: 800;
+        }
+
+        /* CUSTOM NEON ALERT POPUP STYLING */
+        .custom-alert-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        .custom-alert-overlay.active {
+            display: flex;
+        }
+        .custom-alert-box {
+            width: 100%;
+            max-width: 360px;
+            background: #181920;
+            border: 2px solid #00f2fe;
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .custom-alert-overlay.active .custom-alert-box {
+            transform: scale(1);
+        }
+        .custom-alert-icon {
+            font-size: 34px;
+            margin-bottom: 10px;
+        }
+        .custom-alert-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        .custom-alert-msg {
+            font-size: 13px;
+            color: #a0a0ab;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+        .custom-alert-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            border: none;
+            border-radius: 10px;
+            color: #0f1015;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
+        }
+
+        .about-logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .about-logo-box img {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+        }
+
+        .ad-space {
+            width: 100%;
+            max-width: 500px;
+            height: 75px;
+            background: #181920;
+            border: 2px dashed #323546;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #606770;
+            font-weight: bold;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); }
+            100% { transform: scale(1.03); box-shadow: 0 0 30px rgba(0, 242, 254, 1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Bar -->
+    <div class="header-bar">
+        <div class="header-left">
+            <button class="menu-btn" onclick="openSidebar()">☰</button>
+            <!-- EMBEDDED LOGO FOR APK -->
+            <img class="app-logo-img header-logo" alt="App Logo">
+            <div class="header-title" id="pageTitle">Voice Translator</div>
+        </div>
+        <div style="width: 24px;"></div>
+    </div>
+
+    <!-- Overlay & Sidebar Drawer -->
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+    <div class="sidebar" id="sidebar">
+        <!-- LOGO IN SIDEBAR HEADER -->
+        <div class="sidebar-header">
+            <img class="app-logo-img sidebar-logo" alt="Logo">
+            <span>Universal AI Translator</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li id="menuVoice" class="active" onclick="switchPage('voice')">🎙️ Voice Translator</li>
+            <li id="menuText" onclick="switchPage('text')">✍️ Text Translator</li>
+            <li id="menuDonate" onclick="switchPage('donate')">💖 Support / Donate</li>
+            <li id="menuReport" onclick="switchPage('report')">🛠️ Report Problem</li>
+            <li id="menuAbout" onclick="switchPage('about')">ℹ️ About App</li>
+        </ul>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="container">
+
+        <!-- ================= PAGE 1: VOICE TRANSLATOR ================= -->
+        <div id="voiceSection" class="section-page active-page">
+            <label>Input Language:</label>
+            <button class="lang-trigger-btn" id="voiceInputBtn" onclick="openLangModal('voice_input')">
+                <span id="voiceInputLabel">⭐ ROMAN URDU (Urdu in English Script)</span> ▾
+            </button>
+
+            <label>Target Language (Output):</label>
+            <button class="lang-trigger-btn" id="voiceOutputBtn" onclick="openLangModal('voice_output')">
+                <span id="voiceOutputLabel">⭐ ENGLISH (Global)</span> ▾
+            </button>
+
+            <button id="micBtn" class="anim-btn btn-mic-anim" onclick="toggleRecording()">🎤 TAP TO SPEAK</button>
+
+            <label>Recognized Speech Text:</label>
+            <textarea id="voiceInputText" placeholder="Your spoken text will appear here..."></textarea>
+
+            <label>Translation Result:</label>
+            <div id="voiceOutputText" class="result-box">Result will appear here...</div>
+            <button class="anim-btn btn-voice-listen" onclick="speakAudioFast('voiceOutputText', currentTargetLang('voice_output'))">🔊 LISTEN RESULT</button>
+        </div>
+
+        <!-- ================= PAGE 2: TEXT TRANSLATOR ================= -->
+        <div id="textSection" class="section-page">
+            <label>Source Language:</label>
+            <button class="lang-trigger-btn" id="textInputBtn" onclick="openLangModal('text_input')">
+                <span id="textInputLabel">⭐ ROMAN URDU (Urdu in English Script)</span> ▾
+            </button>
+
+            <label>Target Language (Output):</label>
+            <button class="lang-trigger-btn" id="textOutputBtn" onclick="openLangModal('text_output')">
+                <span id="textOutputLabel">⭐ ENGLISH (Global)</span> ▾
+            </button>
+
+            <label>Type Your Text:</label>
+            <textarea id="textInputText" placeholder="Type here to translate..."></textarea>
+
+            <button class="anim-btn btn-text-translate" onclick="translateTextManual()">⚡ TRANSLATE TEXT</button>
+
+            <label>Translation Result:</label>
+            <div id="textOutputText" class="result-box">Result will appear here...</div>
+            <button class="anim-btn btn-text-listen" onclick="speakAudioFast('textOutputText', currentTargetLang('text_output'))">🔊 LISTEN RESULT</button>
+        </div>
+
+        <!-- ================= PAGE 3: DONATION PAGE ================= -->
+        <div id="donateSection" class="section-page">
+            <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;">Support Developer 💖</h3>
+            <p style="font-size: 13px; line-height: 1.5; color: #b0b3c2; margin-bottom: 15px;">
+                If you like this free app, consider supporting us to keep servers running and help us add new powerful AI tools!
+            </p>
+
+            <div class="donate-card">
+                <div class="donate-card-title">
+                    <span>🟢 EasyPaisa</span>
+                    <button class="copy-btn-sm" onclick="copyNum('03000000000')">Copy Number</button>
+                </div>
+                <div style="font-size: 13px; color: #ffffff; font-weight: bold;">0300-0000000</div>
+                <div style="font-size: 11px; color: #a0a0ab;">Account Title: Gamers Club</div>
+            </div>
+
+            <div class="donate-card">
+                <div class="donate-card-title">
+                    <span>🔴 JazzCash</span>
+                    <button class="copy-btn-sm" onclick="copyNum('03000000000')">Copy Number</button>
+                </div>
+                <div style="font-size: 13px; color: #ffffff; font-weight: bold;">0300-0000000</div>
+                <div style="font-size: 11px; color: #a0a0ab;">Account Title: Gamers Club</div>
+            </div>
+
+            <div class="donate-card">
+                <div class="donate-card-title">
+                    <span>🏦 Bank Transfer</span>
+                </div>
+                <div style="font-size: 12px; color: #ffffff;">Bank Name: Meezan Bank / HBL</div>
+                <div style="font-size: 12px; color: #ffffff;">Account Title: Gamers Club</div>
+                <div style="font-size: 12px; color: #00f2fe; font-weight: bold;">IBAN: PK00BANK0000000000000000</div>
+            </div>
+
+            <p style="font-size: 11px; color: #808395; text-align: center; margin-top: 15px;">
+                Thank you for your generous contribution! 🙏
+            </p>
+        </div>
+
+        <!-- ================= PAGE 4: REPORT PROBLEM PAGE ================= -->
+        <!-- Report / Contact Page -->
+<div id="reportSection" class="section-page">
+    <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;">Report Problem / Feedback 🛠️</h3>
+    <p style="font-size: 13px; line-height: 1.5; color: #b0b3c2; margin-bottom: 15px;">
+        Facing any issue, bug, or have a suggestion? Fill out the form below to let us know!
+    </p>
+
+    <!-- AJAX Formspree Form -->
+    <form id="reportForm" action="https://formspree.io/f/maqrbyoq" method="POST" style="display: flex; flex-direction: column; gap: 12px; background: #222430; padding: 18px; border-radius: 12px; border: 1px solid #3e4259;" onsubmit="submitReportForm(event)">
+        
+        <div>
+            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Your Name (Optional)</label>
+            <input type="text" name="name" placeholder="Enter your name..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
+        </div>
+
+        <div>
+            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Your Email Address</label>
+            <input type="email" name="email" required placeholder="Enter your email address..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
+        </div>
+
+        <div>
+            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Issue Category</label>
+            <select name="category" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
+                <option value="Voice Mic Issue">🎙️ Voice Recognition Bug</option>
+                <option value="Translation Incorrect">⚡ Translation Error</option>
+                <option value="Audio Text-to-Speech">🔊 Audio Output Issue</option>
+                <option value="App Layout / Design">🎨 Layout or UI Bug</option>
+                <option value="Other Feature Request">💡 Other Suggestion / Request</option>
+            </select>
+        </div>
+
+        <div>
+            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Problem Details</label>
+            <textarea name="message" rows="4" required placeholder="Describe the issue in detail..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; resize: vertical; outline: none;"></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="anim-btn btn-report-submit" style="margin-top: 6px;">
+            📩 SUBMIT REPORT
+        </button>
+        
+        <div id="formStatus" style="text-align: center; font-size: 13px; font-weight: bold; margin-top: 10px; display: none;"></div>
+    </form>
+</div>
+
+<script>
+async function submitReportForm(event) {
+    event.preventDefault();
+    const form = document.getElementById('reportForm');
+    const btn = document.getElementById('submitBtn');
+    const status = document.getElementById('formStatus');
+    
+    btn.disabled = true;
+    btn.innerText = "⏳ SUBMITTING...";
+    
+    const data = new FormData(form);
+    
+    try {
+        const response = await fetch(form.action, {
+            method: form.method,
+            body: data,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+<!-- ================= PAGE 4: REPORT PROBLEM PAGE (WITH SOUND) ================= -->
+<div id="reportSection" class="section-page">
+    <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;">Report Problem / Feedback 🛠️</h3>
+    <p style="font-size: 13px; line-height: 1.5; color: #b0b3c2; margin-bottom: 15px;">
+        Facing any issue, bug, or have a suggestion? Fill out the form below to let us know!
+    </p>
+
+    <!-- AJAX Formspree Form -->
+    <form id="reportForm" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST" style="display: flex; flex-direction: column; gap: 12px; background: #222430; padding: 18px; border-radius: 12px; border: 1px solid #3e4259;">
+        
+        <input type="hidden" name="_subject" value="New App Issue Report!">
+        
+        <div>
+            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Your Name (Optional)</label>
+            <input type="text" name="name" placeholder="Enter your name..." onclick="if(typeof playClickSound === 'function') playClickSound('click');" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
+        </div>
+
+        <div>
+            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Your Email Address</label>
+            <input type="email" name="email" required placeholder="Enter your email address..." onclick="if(typeof playClickSound === 'function') playClickSound('click');" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
+        </div>
+
+        <div>
+            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Issue Category</label>
+            <select name="category" onchange="if(typeof playClickSound === 'function') playClickSound('click');" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
+                <option value="Voice Mic Issue">🎙️ Voice Recognition Bug</option>
+                <option value="Translation Incorrect">⚡ Translation Error</option>
+                <option value="Audio Text-to-Speech">🔊 Audio Output Issue</option>
+                <option value="App Layout / Design">🎨 Layout or UI Bug</option>
+                <option value="Other Feature Request">💡 Other Suggestion / Request</option>
+            </select>
+        </div>
+
+        <div>
+            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Problem Details</label>
+            <textarea name="message" rows="4" required placeholder="Describe the issue in detail..." onclick="if(typeof playClickSound === 'function') playClickSound('click');" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; resize: vertical; outline: none;"></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn" class="anim-btn btn-report-submit" style="margin-top: 6px;">
+            📩 SUBMIT REPORT
+        </button>
+        
+        <div id="formStatus" style="text-align: center; font-size: 13px; font-weight: bold; margin-top: 10px; display: none;"></div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('reportForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Redirect Stop karega
+        
+        // Submit Button Click Sound
+        if (typeof playClickSound === 'function') {
+            playClickSound('click');
+        }
+        
+        const form = event.target;
+        const btn = document.getElementById('submitBtn');
+        const status = document.getElementById('formStatus');
+        
+        btn.disabled = true;
+        btn.innerText = "⏳ SUBMITTING...";
+        status.style.display = "none";
+        
+        const data = new FormData(form);
+        
+        try {
+            const response = await fetch(form.action, {
+                method: form.method,
+                body: data,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                status.style.display = "block";
+                status.style.color = "#00f2fe";
+                status.innerText = "✅ Thank you! Your report has been submitted successfully.";
+                form.reset();
+            } else {
+                status.style.display = "block";
+                status.style.color = "#ff0050";
+                status.innerText = "❌ Formspree Error: Check if your Form ID is correct.";
+            }
+        } catch (error) {
+            status.style.display = "block";
+            status.style.color = "#ff0050";
+            status.innerText = "❌ Network error! Please check your internet connection.";
+        }
+        
+        btn.disabled = false;
+        btn.innerText = "📩 SUBMIT REPORT";
+    });
+</script>
+
+
+        <!-- ================= PAGE 5: ABOUT APP ================= -->
+        <div id="aboutSection" class="section-page">
+            <!-- LOGO IN ABOUT SECTION -->
+            <div class="about-logo-box">
+                <img class="app-logo-img" alt="App Logo">
+                <div>
+                    <h3 style="color: #00f2fe; font-size: 18px;">Universal AI Translator</h3>
+                    <span style="font-size: 11px; color: #a0a0ab;">v1.0.0 (Stable)</span>
+                </div>
+            </div>
+
+            <p style="font-size: 13px; line-height: 1.6; color: #b0b3c2; margin-bottom: 15px;">
+                Universal AI Translator is a fast, accurate, and lightweight translation tool powered by advanced AI engines. Translate seamlessly between Roman Urdu, Urdu, English, Arabic, and over 1000+ world languages.
+            </p>
+
+            <h4 style="color: #ffffff; font-size: 14px; margin-bottom: 8px;">✨ Key Features:</h4>
+            <ul style="color: #a0a0ab; font-size: 13px; padding-left: 20px; line-height: 1.8; margin-bottom: 15px;">
+                <li>🎙️ Real-time Voice & Speech Recognition</li>
+                <li>✍️ Instant Multi-Language Text Translation</li>
+                <li>🔊 Text-to-Speech (High Quality Audio Output)</li>
+                <li>🔍 A-Z World Languages with Quick Search</li>
+                <li>⚡ Fast & Accurate Roman Urdu Fixer</li>
+            </ul>
+
+            <h4 style="color: #ffffff; font-size: 14px; margin-bottom: 6px;">🔒 Privacy & Security:</h4>
+            <p style="font-size: 12px; line-height: 1.5; color: #808395; margin-bottom: 15px;">
+                Your privacy matters. All voice inputs and typed content are processed securely solely for instant translation and are never stored or shared on external servers.
+            </p>
+
+            <div style="border-top: 1px solid #282a36; padding-top: 12px; margin-top: 10px; font-size: 12px; color: #a0a0ab; display: flex; flex-direction: column; gap: 6px;">
+                <div><strong>Developer:</strong> GAMERS CLUB TECH</div>
+                <div><strong>Support Email:</strong> ninjgamer1234@gmail.com</div>
+                <div><strong>Version:</strong> 1.0.0 (Stable)</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- LANGUAGE SELECTION POPUP MODAL -->
+    <div class="modal-overlay" id="langModal">
+        <div class="lang-modal">
+            <div class="modal-header">
+                <span>Select Language</span>
+                <button class="close-modal-btn" onclick="closeLangModal()">✕</button>
+            </div>
+            <input type="text" class="modal-search" placeholder="🔍 Search language or code..." id="modalSearchInput" onkeyup="filterModalLanguages()">
+            <div class="lang-list-container" id="modalLangList"></div>
+        </div>
+    </div>
+
+    <!-- CUSTOM STYLISH ALERT MODAL -->
+    <div class="custom-alert-overlay" id="alertModal">
+        <div class="custom-alert-box">
+            <div class="custom-alert-icon" id="alertIcon">⚠️</div>
+            <div class="custom-alert-title" id="alertTitle">Notice</div>
+            <div class="custom-alert-msg" id="alertMsg">Please enter some text first!</div>
+            <button class="custom-alert-btn" onclick="closeCustomAlert()">GOT IT</button>
+        </div>
+    </div>
+
+    <!-- Ad Space Placeholder -->
+    <div class="ad-space">
+        📢 AD BANNER SPACE (Place AdMob / Web Ads Code Here)
+    </div>
+
+    <script>
+        // EMBEDDED HIGH QUALITY LOGO FOR OFFLINE APK SUPPORT
+        const logoDataURI = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%233b82f6'/><path d='M20 22 C20 18 24 15 28 15 L52 15 C56 15 60 18 60 22 L60 52 C60 56 56 60 52 60 L38 60 L24 70 L26 60 L20 60 C16 60 12 56 12 52 Z' fill='%23ffffff'/><text x='36' y='46' font-family='Arial, sans-serif' font-weight='bold' font-size='26' fill='%232563eb' text-anchor='middle'>A</text><path d='M40 38 C40 34 44 31 48 31 L72 31 C76 31 80 34 80 38 L80 68 C80 72 76 76 72 76 L66 76 L68 86 L54 76 L48 76 C44 76 40 72 40 68 Z' fill='%23e0e7ff' opacity='0.95'/><text x='60' y='62' font-family='Arial, sans-serif' font-weight='bold' font-size='24' fill='%231e40af' text-anchor='middle'>文</text></svg>";
+
+        // Auto Load Logo across all images in App
+        window.addEventListener('DOMContentLoaded', () => {
+            const logoImages = document.querySelectorAll('.app-logo-img');
+            logoImages.forEach(img => {
+                img.src = logoDataURI;
+            });
+        });
+
+        const languagesData = [
+            { code: "auto", name: "⭐ AUTO DETECT LANGUAGE" },
+            { code: "roman_urdu", name: "⭐ ROMAN URDU (Urdu in English Script)" },
+            { code: "ur", name: "⭐ URDU (پاکستان / اردو)" },
+            { code: "en", name: "⭐ ENGLISH (Global)" },
+            { code: "af", name: "A - Afrikaans" },
+            { code: "sq", name: "A - Albanian" },
+            { code: "am", name: "A - Amharic" },
+            { code: "ar", name: "A - Arabic (العربية)" },
+            { code: "hy", name: "A - Armenian" },
+            { code: "az", name: "A - Azerbaijani" },
+            { code: "eu", name: "B - Basque" },
+            { code: "be", name: "B - Belarusian" },
+            { code: "bn", name: "B - Bengali (বাংলা)" },
+            { code: "bs", name: "B - Bosnian" },
+            { code: "bg", name: "B - Bulgarian" },
+            { code: "my", name: "B - Burmese (Myanmar)" },
+            { code: "ca", name: "C - Catalan" },
+            { code: "zh-CN", name: "C - Chinese Mandarin (Simplified)" },
+            { code: "zh-TW", name: "C - Chinese Mandarin (Traditional)" },
+            { code: "hr", name: "C - Croatian" },
+            { code: "cs", name: "C - Czech" },
+            { code: "da", name: "D - Danish" },
+            { code: "nl", name: "D - Dutch" },
+            { code: "eo", name: "E - Esperanto" },
+            { code: "et", name: "E - Estonian" },
+            { code: "fi", name: "F - Finnish" },
+            { code: "fr", name: "F - French (Français)" },
+            { code: "gl", name: "G - Galician" },
+            { code: "ka", name: "G - Georgian" },
+            { code: "de", name: "G - German (Deutsch)" },
+            { code: "el", name: "G - Greek" },
+            { code: "gu", name: "G - Gujarati" },
+            { code: "ht", name: "H - Haitian Creole" },
+            { code: "ha", name: "H - Hausa" },
+            { code: "he", name: "H - Hebrew" },
+            { code: "hi", name: "H - Hindi (हिन्दी)" },
+            { code: "hu", name: "H - Hungarian" },
+            { code: "is", name: "I - Icelandic" },
+            { code: "id", name: "I - Indonesian" },
+            { code: "ga", name: "I - Irish" },
+            { code: "it", name: "I - Italian" },
+            { code: "ja", name: "J - Japanese (日本語)" },
+            { code: "jv", name: "J - Javanese" },
+            { code: "kn", name: "K - Kannada" },
+            { code: "kk", name: "K - Kazakh" },
+            { code: "km", name: "K - Khmer" },
+            { code: "ko", name: "K - Korean (한국어)" },
+            { code: "ku", name: "K - Kurdish" },
+            { code: "lo", name: "L - Lao" },
+            { code: "la", name: "L - Latin" },
+            { code: "lv", name: "L - Latvian" },
+            { code: "lt", name: "L - Lithuanian" },
+            { code: "mk", name: "M - Macedonian" },
+            { code: "ms", name: "M - Malay" },
+            { code: "ml", name: "M - Malayalam" },
+            { code: "mr", name: "M - Marathi" },
+            { code: "mn", name: "M - Mongolian" },
+            { code: "ne", name: "N - Nepali" },
+            { code: "no", name: "N - Norwegian" },
+            { code: "ps", name: "P - Pashto (پښتو)" },
+            { code: "fa", name: "P - Persian (فارسی)" },
+            { code: "pl", name: "P - Polish" },
+            { code: "pt", name: "P - Portuguese" },
+            { code: "pa", name: "P - Punjabi (پنجابی)" },
+            { code: "ro", name: "R - Romanian" },
+            { code: "ru", name: "R - Russian (Русский)" },
+            { code: "sr", name: "S - Serbian" },
+            { code: "sd", name: "S - Sindhi (سنڌي)" },
+            { code: "si", name: "S - Sinhala" },
+            { code: "sk", name: "S - Slovak" },
+            { code: "es", name: "S - Spanish (Español)" },
+            { code: "su", name: "S - Sundanese" },
+            { code: "sw", name: "S - Swahili" },
+            { code: "sv", name: "S - Swedish" },
+            { code: "tg", name: "T - Tajik" },
+            { code: "ta", name: "T - Tamil" },
+            { code: "te", name: "T - Telugu" },
+            { code: "th", name: "T - Thai" },
+            { code: "tr", name: "T - Turkish (Türkçe)" },
+            { code: "uk", name: "U - Ukrainian" },
+            { code: "uz", name: "U - Uzbek" },
+            { code: "vi", name: "V - Vietnamese" },
+            { code: "cy", name: "W - Welsh" },
+            { code: "yi", name: "Y - Yiddish" },
+            { code: "yo", name: "Y - Yoruba" },
+            { code: "zu", name: "Z - Zulu" }
+        ];
+
+        let activeTargetSlot = '';
+        let selectedLangs = {
+            voice_input: { code: 'roman_urdu', name: '⭐ ROMAN URDU (Urdu in English Script)' },
+            voice_output: { code: 'en', name: '⭐ ENGLISH (Global)' },
+            text_input: { code: 'roman_urdu', name: '⭐ ROMAN URDU (Urdu in English Script)' },
+            text_output: { code: 'en', name: '⭐ ENGLISH (Global)' }
+        };
+
+        function currentTargetLang(slotKey) {
+            return selectedLangs[slotKey].code;
+        }
+
+        // CUSTOM STYLISH ALERT FUNCTION
+        function showCustomAlert(msg, title = "Attention", icon = "⚠️") {
+            playClickSound('click');
+            document.getElementById('alertIcon').innerText = icon;
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMsg').innerText = msg;
+            document.getElementById('alertModal').classList.add('active');
+        }
+
+        function closeCustomAlert() {
+            playClickSound('click');
+            document.getElementById('alertModal').classList.remove('active');
+        }
+
+        function openLangModal(slotKey) {
+            playClickSound('click');
+            activeTargetSlot = slotKey;
+            document.getElementById('modalSearchInput').value = '';
+            renderModalLangList(languagesData);
+            document.getElementById('langModal').classList.add('active');
+        }
+
+        function closeLangModal() {
+            document.getElementById('langModal').classList.remove('active');
+        }
+
+        function renderModalLangList(list) {
+            const container = document.getElementById('modalLangList');
+            container.innerHTML = '';
+            const currentCode = selectedLangs[activeTargetSlot].code;
+
+            list.forEach(lang => {
+                const item = document.createElement('div');
+                item.className = `lang-item ${lang.code === currentCode ? 'selected' : ''}`;
+                item.innerText = lang.name;
+                item.onclick = function() {
+                    selectLanguageItem(lang.code, lang.name);
+                };
+                container.appendChild(item);
+            });
+        }
+
+        function filterModalLanguages() {
+            const query = document.getElementById('modalSearchInput').value.toLowerCase();
+            const filtered = languagesData.filter(l => l.name.toLowerCase().includes(query));
+            renderModalLangList(filtered);
+        }
+
+        function selectLanguageItem(code, name) {
+            playClickSound('click');
+            selectedLangs[activeTargetSlot] = { code, name };
+
+            if (activeTargetSlot === 'voice_input') document.getElementById('voiceInputLabel').innerText = name;
+            else if (activeTargetSlot === 'voice_output') document.getElementById('voiceOutputLabel').innerText = name;
+            else if (activeTargetSlot === 'text_input') document.getElementById('textInputLabel').innerText = name;
+            else if (activeTargetSlot === 'text_output') document.getElementById('textOutputLabel').innerText = name;
+
+            closeLangModal();
+        }
+
+        let recognition;
+        let isRecording = false;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playClickSound(type) {
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+                } else if (type === 'mic') {
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+                }
+            } catch(e) {}
+        }
+
+        function openSidebar() {
+            playClickSound('click');
+            document.getElementById('sidebar').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+
+        function switchPage(pageName) {
+            playClickSound('click');
+            document.getElementById('voiceSection').classList.remove('active-page');
+            document.getElementById('textSection').classList.remove('active-page');
+            document.getElementById('donateSection').classList.remove('active-page');
+            document.getElementById('reportSection').classList.remove('active-page');
+            document.getElementById('aboutSection').classList.remove('active-page');
+
+            document.getElementById('menuVoice').classList.remove('active');
+            document.getElementById('menuText').classList.remove('active');
+            document.getElementById('menuDonate').classList.remove('active');
+            document.getElementById('menuReport').classList.remove('active');
+            document.getElementById('menuAbout').classList.remove('active');
+
+            if (pageName === 'voice') {
+                document.getElementById('voiceSection').classList.add('active-page');
+                document.getElementById('menuVoice').classList.add('active');
+                document.getElementById('pageTitle').innerText = "Voice Translator";
+            } else if (pageName === 'text') {
+                document.getElementById('textSection').classList.add('active-page');
+                document.getElementById('menuText').classList.add('active');
+                document.getElementById('pageTitle').innerText = "Text Translator";
+            } else if (pageName === 'donate') {
+                document.getElementById('donateSection').classList.add('active-page');
+                document.getElementById('menuDonate').classList.add('active');
+                document.getElementById('pageTitle').innerText = "Support / Donate";
+            } else if (pageName === 'report') {
+                document.getElementById('reportSection').classList.add('active-page');
+                document.getElementById('menuReport').classList.add('active');
+                document.getElementById('pageTitle').innerText = "Report Problem";
+            } else if (pageName === 'about') {
+                document.getElementById('aboutSection').classList.add('active-page');
+                document.getElementById('menuAbout').classList.add('active');
+                document.getElementById('pageTitle').innerText = "About App";
+            }
+            closeSidebar();
+        }
+
+        function copyNum(textToCopy) {
+            playClickSound('click');
+            navigator.clipboard.writeText(textToCopy);
+            showCustomAlert("Account Number copied to clipboard!", "Copied!", "📋");
+        }
+
+        function submitReport() {
+            playClickSound('click');
+            const name = document.getElementById('reportName').value.trim();
+            const type = document.getElementById('reportType').value;
+            const details = document.getElementById('reportDetails').value.trim();
+
+            if (!details) {
+                showCustomAlert("Please describe the issue details before submitting!", "Field Required", "📝");
+                return;
+            }
+
+            const subject = encodeURIComponent(`[App Report] ${type} - ${name || 'User'}`);
+            const body = encodeURIComponent(`Name: ${name}\nCategory: ${type}\n\nProblem Details:\n${details}`);
+            
+            window.location.href = `mailto:ninjgamer1234@gmail.com?subject=${subject}&body=${body}`;
+            showCustomAlert("Opening your mail app to send report...", "Redirecting", "📩");
+        }
+
+        function initSpeech() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('voiceInputText').value = transcript;
+                    stopRecording();
+                    autoTranslateVoice();
+                };
+                recognition.onerror = function() { 
+                    stopRecording();
+                    showCustomAlert("Voice recognition failed. Please try speaking clearly.", "Mic Error", "🎙️");
+                };
+                recognition.onend = function() { stopRecording(); };
+            }
+        }
+        initSpeech();
+
+        function toggleRecording() {
+            if (!recognition) initSpeech();
+            if (!isRecording) {
+                try {
+                    playClickSound('mic');
+                    const selectedSource = selectedLangs.voice_input.code;
+                    recognition.lang = (selectedSource === "ur" || selectedSource === "roman_urdu") ? "ur-PK" : "en-US";
+                    recognition.start();
+                    isRecording = true;
+                    const btn = document.getElementById('micBtn');
+                    btn.innerText = "🛑 LISTENING...";
+                    btn.classList.add('recording');
+                } catch(e) {}
+            } else {
+                stopRecording();
+            }
+        }
+
+        function stopRecording() {
+            if (recognition && isRecording) recognition.stop();
+            isRecording = false;
+            const btn = document.getElementById('micBtn');
+            btn.innerText = "🎤 TAP TO SPEAK";
+            btn.classList.remove('recording');
+        }
+
+        async function autoTranslateVoice() {
+            const text = document.getElementById('voiceInputText').value.trim();
+            const outputBox = document.getElementById('voiceOutputText');
+            let sourceLang = selectedLangs.voice_input.code;
+            const targetLang = selectedLangs.voice_output.code;
+
+            if (!text) return;
+            outputBox.innerText = "Translating...";
+            if (sourceLang === "roman_urdu") sourceLang = "auto";
+
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data && data[0]) {
+                    let res = "";
+                    data[0].forEach(item => { if (item[0]) res += item[0]; });
+                    outputBox.innerText = res;
+                }
+            } catch (error) {
+                outputBox.innerText = "Translation error. Try again.";
+            }
+        }
+
+        async function translateTextManual() {
+            playClickSound('click');
+            const text = document.getElementById('textInputText').value.trim();
+            const outputBox = document.getElementById('textOutputText');
+            let sourceLang = selectedLangs.text_input.code;
+            const targetLang = selectedLangs.text_output.code;
+
+            if (!text) {
+                showCustomAlert("Please type some text before clicking translate!", "Input Required", "✍️");
+                return;
+            }
+            outputBox.innerText = "Translating...";
+            if (sourceLang === "roman_urdu") sourceLang = "auto";
+
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data && data[0]) {
+                    let res = "";
+                    data[0].forEach(item => { if (item[0]) res += item[0]; });
+                    outputBox.innerText = res;
+                }
+            } catch (error) {
+                outputBox.innerText = "Translation error. Try again.";
+            }
+        }
+
+        function speakAudioFast(boxId, langCode) {
+            playClickSound('click');
+            const text = document.getElementById(boxId).innerText;
+
+            if (!text || text === "Result will appear here...") {
+                showCustomAlert("There is no result text to speak out loud!", "Empty Result", "🔊");
+                return;
+            }
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                setTimeout(() => {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = langCode === "ur" ? "ur-PK" : (langCode === "hi" ? "hi-IN" : (langCode === "ar" ? "ar-SA" : "en-US"));
+                    utterance.rate = 1.0;
+                    utterance.pitch = 1.0;
+                    window.speechSynthesis.speak(utterance);
+                }, 50);
+            } else {
+                showCustomAlert("Text-to-speech feature is not supported on this browser.", "Not Supported", "🚫");
+            }
+        }
+    </script>
+</body>
+</html>
