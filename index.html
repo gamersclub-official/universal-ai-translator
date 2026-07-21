@@ -1,42 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>
-  window.addEventListener('DOMContentLoaded', (event) => {
-    // 1. Request Microphone Permission
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(function(stream) {
-          console.log("Microphone permission granted");
-          // Stream ko stop kar dein taake mic background mein chalta na rahe
-          stream.getTracks().forEach(track => track.stop());
-        })
-        .catch(function(err) {
-          console.log("Microphone permission denied: " + err);
-        });
-    }
 
-    // 2. Request Notification Permission
-    if ("Notification" in window) {
-      if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-        Notification.requestPermission().then(function (permission) {
-          if (permission === "granted") {
-            console.log("Notification permission granted");
-          }
-        });
-      }
-    }
-
-    // 3. Request Storage (File Access) Permission
-    if (navigator.storage && navigator.storage.persist) {
-      navigator.storage.persist().then(function(persistent) {
-        if (persistent) {
-          console.log("Storage permission granted");
-        }
-      });
-    }
-  });
-    </script>
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
