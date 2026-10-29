@@ -1125,37 +1125,7 @@
 function verifyFirebaseKey() {
     const userKey = document.getElementById('activationKeyInput').value.trim();
     
-    if (!userKey) {
-        showCustomAlert("Please enter your activation key!", "Error", "⚠️");
-        return;
-    }
 
-    // Direct path check (Firebase standard way)
-    db.ref('pro_keys/' + userKey).once('value').then((snapshot) => {
-        const val = snapshot.val();
-
-        if (val === null) {
-            // Key database mein hai hi nahi
-            showCustomAlert("Invalid activation key! Please check the code.", "Invalid Key", "❌");
-        } else if (val === true) {
-            // Key already use ho chuki hai
-            showCustomAlert("This key has already been used by someone else!", "Key Expired", "❌");
-        } else if (val === false) {
-            // Key valid aur unused hai!
-            db.ref('pro_keys/' + userKey).set(true);
-
-            let expiryDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
-            localStorage.setItem('is_premium', 'true');
-            localStorage.setItem('premium_expiry', expiryDate);
-
-            updateLimitCounters();
-            showCustomAlert("Success! Your 30-Day Pro access has been activated.", "Activated! 👑", "🚀");
-            document.getElementById('activationKeyInput').value = '';
-        }
-    }).catch((error) => {
-        showCustomAlert("Network error connecting to cloud database. Check internet.", "Connection Error", "🌐");
-    });
-}
 
 
 
