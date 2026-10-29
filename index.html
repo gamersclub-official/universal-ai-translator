@@ -1098,7 +1098,7 @@
         });
 
         // ================= FIREBASE REAL-TIME KEY VERIFICATION =================
-        function verifyFirebaseKey() {
+function verifyFirebaseKey() {
     const userKey = document.getElementById('activationKeyInput').value.trim();
     
     if (!userKey) {
@@ -1106,16 +1106,18 @@
         return;
     }
 
-    // Direct database se pro_keys fetch karke check karenge
-    db.ref('pro_keys').once('value').then((snapshot) => {
-        const keysObj = snapshot.val();
+    // Direct path check (Firebase standard way)
+    db.ref('pro_keys/' + userKey).once('value').then((snapshot) => {
+        const val = snapshot.val();
 
-        if (!keysObj || !keysObj[userKey]) {
+        if (val === null) {
+            // Key database mein hai hi nahi
             showCustomAlert("Invalid activation key! Please check the code.", "Invalid Key", "❌");
-        } else if (keysObj[userKey] === true) {
+        } else if (val === true) {
+            // Key already use ho chuki hai
             showCustomAlert("This key has already been used by someone else!", "Key Expired", "❌");
-        } else {
-            // Key ko used (true) mark kar do
+        } else if (val === false) {
+            // Key valid aur unused hai!
             db.ref('pro_keys/' + userKey).set(true);
 
             let expiryDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
@@ -1130,6 +1132,7 @@
         showCustomAlert("Network error connecting to cloud database. Check internet.", "Connection Error", "🌐");
     });
 }
+
 
 
         function checkAndExpireSubscription() {
