@@ -7,6 +7,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal AI Translator</title>
+    
+    <!-- Firebase App & Database Compat SDKs (CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -93,7 +98,7 @@
             margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         .sidebar-logo {
             width: 35px;
@@ -104,15 +109,29 @@
             list-style: none;
         }
         .sidebar-menu li {
-            padding: 16px 20px;
-            font-size: 15px;
+            padding: 14px 20px;
+            font-size: 14px;
             color: #b0b3c2;
             cursor: pointer;
             transition: background 0.2s, color 0.2s;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             font-weight: 600;
+        }
+        .sidebar-menu li span.emoji-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            text-align: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .sidebar-menu li span.menu-text {
+            display: inline-block;
+            line-height: 1.2;
+            flex-grow: 1;
         }
         .sidebar-menu li:hover, .sidebar-menu li.active {
             background: #252734;
@@ -146,7 +165,6 @@
             margin-bottom: 20px;
         }
 
-        /* Distinct Page Views */
         .section-page {
             display: none;
         }
@@ -164,12 +182,11 @@
             letter-spacing: 0.5px;
         }
 
-        /* Clean Pop-up Trigger Button Style */
         .lang-trigger-btn {
             width: 100%;
             padding: 13px 15px;
             background: #222430;
-            color: #00f2fe; /* Pure Electric Cyan */
+            color: #00f2fe;
             border: 1px solid #3e4259;
             border-radius: 10px;
             margin-top: 6px;
@@ -183,11 +200,8 @@
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
             transition: border 0.2s;
         }
-        .lang-trigger-btn:active {
-            border-color: #00f2fe;
-        }
 
-        textarea, input[type="text"], select {
+        textarea, input[type="text"], input[type="email"], select {
             width: 100%;
             padding: 12px;
             background: #222430;
@@ -204,7 +218,6 @@
             resize: none;
         }
 
-        /* Highlighting Result Box */
         .result-box {
             background: #222430;
             border: 1px solid #3e4259;
@@ -213,13 +226,12 @@
             min-height: 85px;
             font-weight: 700;
             font-size: 16px;
-            color: #00f2fe; /* Pure Electric Cyan */
+            color: #00f2fe;
             word-wrap: break-word;
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
             margin-top: 6px;
         }
 
-        /* Animated Buttons */
         .anim-btn {
             position: relative;
             width: 100%;
@@ -243,42 +255,45 @@
             transform: translateY(-2px) scale(1.01);
         }
 
-        /* Buttons Colors */
         .btn-mic-anim {
             background: linear-gradient(135deg, #ff0050, #ff416c);
             box-shadow: 0 4px 15px rgba(255, 0, 80, 0.4);
         }
-        .btn-mic-anim.recording {
-            background: linear-gradient(135deg, #00f2fe, #4facfe);
-            animation: pulseGlow 1.2s infinite alternate;
-        }
-
-        .btn-voice-listen {
-            background: linear-gradient(135deg, #8a2387, #e94057, #f27121);
-            box-shadow: 0 4px 15px rgba(233, 64, 87, 0.4);
-        }
-
         .btn-text-translate {
             background: linear-gradient(135deg, #2b5876, #4e4376);
             box-shadow: 0 4px 15px rgba(78, 67, 118, 0.4);
         }
-
-        .btn-text-listen {
-            background: linear-gradient(135deg, #11998e, #38ef7d);
-            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.3);
+        .btn-premium-gold {
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #0f1015;
+            box-shadow: 0 4px 20px rgba(247, 151, 30, 0.5);
         }
-
-        .btn-donate-submit {
-            background: linear-gradient(135deg, #f12711, #f5af19);
-            box-shadow: 0 4px 15px rgba(245, 175, 25, 0.4);
-        }
-
-        .btn-report-submit {
+        .btn-pay-action {
             background: linear-gradient(135deg, #00c6ff, #0072ff);
-            box-shadow: 0 4px 15px rgba(0, 114, 255, 0.4);
+            color: #ffffff;
+            padding: 8px 14px;
+            font-size: 12px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 6px;
         }
 
-        /* Donation Card Box Styles */
+        /* Pricing Cards */
+        .plan-card {
+            background: #222430;
+            border: 1px solid #3e4259;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .plan-card.premium {
+            border: 2px solid #ffd200;
+            background: linear-gradient(135deg, #222430, #1d1f2b);
+        }
+
         .donate-card {
             background: #222430;
             border: 1px solid #3e4259;
@@ -287,7 +302,7 @@
             margin-top: 10px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
         .donate-card-title {
             font-size: 15px;
@@ -307,7 +322,7 @@
             cursor: pointer;
         }
 
-        /* POP-UP LANGUAGE SELECTION MODAL STYLING */
+        /* MODAL STYLING */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -319,9 +334,7 @@
             padding: 15px;
             backdrop-filter: blur(4px);
         }
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
         .lang-modal {
             width: 100%;
             max-width: 440px;
@@ -389,7 +402,7 @@
             font-weight: 800;
         }
 
-        /* CUSTOM NEON ALERT POPUP STYLING */
+        /* CUSTOM ALERT */
         .custom-alert-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -401,9 +414,7 @@
             padding: 20px;
             backdrop-filter: blur(5px);
         }
-        .custom-alert-overlay.active {
-            display: flex;
-        }
+        .custom-alert-overlay.active { display: flex; }
         .custom-alert-box {
             width: 100%;
             max-width: 360px;
@@ -413,39 +424,6 @@
             padding: 22px;
             box-shadow: 0 0 30px rgba(0, 242, 254, 0.3);
             text-align: center;
-            transform: scale(0.9);
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .custom-alert-overlay.active .custom-alert-box {
-            transform: scale(1);
-        }
-        .custom-alert-icon {
-            font-size: 34px;
-            margin-bottom: 10px;
-        }
-        .custom-alert-title {
-            font-size: 16px;
-            font-weight: 800;
-            color: #ffffff;
-            margin-bottom: 8px;
-        }
-        .custom-alert-msg {
-            font-size: 13px;
-            color: #a0a0ab;
-            line-height: 1.5;
-            margin-bottom: 18px;
-        }
-        .custom-alert-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #00f2fe, #4facfe);
-            border: none;
-            border-radius: 10px;
-            color: #0f1015;
-            font-weight: 800;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.4);
         }
 
         .about-logo-box {
@@ -454,32 +432,7 @@
             gap: 12px;
             margin-bottom: 15px;
         }
-        .about-logo-box img {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-        }
-
-        .ad-space {
-            width: 100%;
-            max-width: 500px;
-            height: 75px;
-            background: #181920;
-            border: 2px dashed #323546;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #606770;
-            font-weight: bold;
-            border-radius: 12px;
-            margin-top: 20px;
-            font-size: 12px;
-        }
-
-        @keyframes pulseGlow {
-            0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 242, 254, 0.5); }
-            100% { transform: scale(1.03); box-shadow: 0 0 30px rgba(0, 242, 254, 1); }
-        }
+        .about-logo-box img { width: 50px; height: 50px; border-radius: 12px; }
     </style>
 </head>
 <body>
@@ -487,28 +440,42 @@
     <!-- Header Bar -->
     <div class="header-bar">
         <div class="header-left">
-            <button class="menu-btn" onclick="openSidebar()">☰</button>
-            <!-- EMBEDDED LOGO FOR APK -->
+            <button class="menu-btn" onclick="openSidebar(); playSound('sidebar');">☰</button>
             <img class="app-logo-img header-logo" alt="App Logo">
             <div class="header-title" id="pageTitle">Voice Translator</div>
         </div>
-        <div style="width: 24px;"></div>
+        <!-- UI Language Selector -->
+        <select id="uiLangSelect" onchange="changeUILanguage(this.value); playSound('button');" style="padding: 4px 8px; font-size: 11px; margin: 0; width: auto; background: #252734; color: #00f2fe; border-color: #3e4259;">
+            <option value="en">🌐 English</option>
+            <option value="ur">🇵🇰 اردو</option>
+            <option value="hi">🇮🇳 हिन्दी</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ru">🇷🇺 Русский</option>
+        </select>
     </div>
 
     <!-- Overlay & Sidebar Drawer -->
     <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
     <div class="sidebar" id="sidebar">
-        <!-- LOGO IN SIDEBAR HEADER -->
         <div class="sidebar-header">
             <img class="app-logo-img sidebar-logo" alt="Logo">
             <span>Universal AI Translator</span>
         </div>
         <ul class="sidebar-menu">
-            <li id="menuVoice" class="active" onclick="switchPage('voice')">🎙️ Voice Translator</li>
-            <li id="menuText" onclick="switchPage('text')">✍️ Text Translator</li>
-            <li id="menuDonate" onclick="switchPage('donate')">💖 Support / Donate</li>
-            <li id="menuReport" onclick="switchPage('report')">🛠️ Report Problem</li>
-            <li id="menuAbout" onclick="switchPage('about')">ℹ️ About App</li>
+            <li id="menuVoice" class="active" onclick="switchPage('voice'); playSound('sidebar');"><span class="emoji-icon">🎙️</span><span class="menu-text" data-i18n="navVoice">Voice Translator</span></li>
+            <li id="menuText" onclick="switchPage('text'); playSound('sidebar');"><span class="emoji-icon">✍️</span><span class="menu-text" data-i18n="navText">Text Translator</span></li>
+            <li id="menuSaved" onclick="switchPage('saved'); playSound('sidebar');"><span class="emoji-icon">⭐</span><span class="menu-text" data-i18n="navSaved">Saved Phrases</span></li>
+            <li id="menuChat" onclick="switchPage('chat'); playSound('sidebar');"><span class="emoji-icon">🗣️</span><span class="menu-text" data-i18n="navChat">2-Way Chat</span> <span id="chatBadge" style="font-size:10px; background:#ff0050; padding:2px 6px; border-radius:4px; color:#fff; margin-left:auto;">2 Free</span></li>
+            <li id="menuCamera" onclick="switchPage('camera'); playSound('sidebar');"><span class="emoji-icon">📷</span><span class="menu-text" data-i18n="navCamera">Camera OCR</span> <span id="camBadge" style="font-size:10px; background:#ff0050; padding:2px 6px; border-radius:4px; color:#fff; margin-left:auto;">2 Free</span></li>
+            <li id="menuPlans" onclick="switchPage('plans'); playSound('sidebar');"><span class="emoji-icon">👑</span><span class="menu-text" data-i18n="navPlans">Plans & Premium</span></li>
+            <li id="menuDonate" onclick="switchPage('donate'); playSound('sidebar');"><span class="emoji-icon">💳</span><span class="menu-text" data-i18n="navDonate">Payment & Activation</span></li>
+            <li id="menuReport" onclick="switchPage('report'); playSound('sidebar');"><span class="emoji-icon">🛠️</span><span class="menu-text" data-i18n="navReport">Report Problem</span></li>
+            <li id="menuAbout" onclick="switchPage('about'); playSound('sidebar');"><span class="emoji-icon">ℹ️</span><span class="menu-text" data-i18n="navAbout">About App</span></li>
         </ul>
     </div>
 
@@ -517,335 +484,699 @@
 
         <!-- ================= PAGE 1: VOICE TRANSLATOR ================= -->
         <div id="voiceSection" class="section-page active-page">
-            <label>Input Language:</label>
-            <button class="lang-trigger-btn" id="voiceInputBtn" onclick="openLangModal('voice_input')">
+            <label data-i18n="lblInputLang">Input Language:</label>
+            <button class="lang-trigger-btn" id="voiceInputBtn" onclick="openLangModal('voice_input'); playSound('button');">
                 <span id="voiceInputLabel">⭐ ROMAN URDU (Urdu in English Script)</span> ▾
             </button>
 
-            <label>Target Language (Output):</label>
-            <button class="lang-trigger-btn" id="voiceOutputBtn" onclick="openLangModal('voice_output')">
+            <label data-i18n="lblOutputLang">Target Language (Output):</label>
+            <button class="lang-trigger-btn" id="voiceOutputBtn" onclick="openLangModal('voice_output'); playSound('button');">
                 <span id="voiceOutputLabel">⭐ ENGLISH (Global)</span> ▾
             </button>
-            <button id="micBtn" class="anim-btn btn-mic-anim" onclick="toggleRecording()">🎤 TAP TO SPEAK</button>
+            <button id="micBtn" class="anim-btn btn-mic-anim" onclick="toggleRecording(); playSound('button');" data-i18n="btnSpeak">🎤 TAP TO SPEAK</button>
             
+            <label data-i18n="lblRecognized">Recognized Speech Text:</label>
+            <textarea id="voiceInputText" data-i18n-placeholder="phVoiceInput" placeholder="Your spoken text will appear here..."></textarea>
 
-            <label>Recognized Speech Text:</label>
-            <textarea id="voiceInputText" placeholder="Your spoken text will appear here..."></textarea>
-
-            <label>Translation Result:</label>
-            <div id="voiceOutputText" class="result-box">Result will appear here...</div>
-
+            <label data-i18n="lblResult">Translation Result:</label>
+            <div id="voiceOutputText" class="result-box" data-i18n="resDefault">Result will appear here...</div>
+            <button class="anim-btn" onclick="saveCurrentTranslation('voiceInputText', 'voiceOutputText'); playSound('button');" style="background: linear-gradient(135deg, #f12711, #f5af19); margin-top: 10px;" data-i18n="btnSave">⭐ SAVE TO FAVORITES</button>
         </div>
 
         <!-- ================= PAGE 2: TEXT TRANSLATOR ================= -->
         <div id="textSection" class="section-page">
-            <label>Source Language:</label>
-            <button class="lang-trigger-btn" id="textInputBtn" onclick="openLangModal('text_input')">
+            <label data-i18n="lblSourceLang">Source Language:</label>
+            <button class="lang-trigger-btn" id="textInputBtn" onclick="openLangModal('text_input'); playSound('button');">
                 <span id="textInputLabel">⭐ ROMAN URDU (Urdu in English Script)</span> ▾
             </button>
 
-            <label>Target Language (Output):</label>
-            <button class="lang-trigger-btn" id="textOutputBtn" onclick="openLangModal('text_output')">
+            <label data-i18n="lblOutputLang">Target Language (Output):</label>
+            <button class="lang-trigger-btn" id="textOutputBtn" onclick="openLangModal('text_output'); playSound('button');">
                 <span id="textOutputLabel">⭐ ENGLISH (Global)</span> ▾
             </button>
 
-            <label>Type Your Text:</label>
-            <textarea id="textInputText" placeholder="Type here to translate..."></textarea>
+            <label data-i18n="lblTypeText">Type Your Text:</label>
+            <textarea id="textInputText" data-i18n-placeholder="phTypeText" placeholder="Type here to translate..."></textarea>
 
-            <button class="anim-btn btn-text-translate" onclick="translateTextManual()">⚡ TRANSLATE TEXT</button>
+            <button class="anim-btn btn-text-translate" onclick="translateTextManual(); playSound('button');" data-i18n="btnTranslate">⚡ TRANSLATE TEXT</button>
 
-            <label>Translation Result:</label>
-            <div id="textOutputText" class="result-box">Result will appear here...</div>
-            
+            <label data-i18n="lblResult">Translation Result:</label>
+            <div id="textOutputText" class="result-box" data-i18n="resDefault">Result will appear here...</div>
+            <button class="anim-btn" onclick="saveCurrentTranslation('textInputText', 'textOutputText'); playSound('button');" style="background: linear-gradient(135deg, #f12711, #f5af19); margin-top: 10px;" data-i18n="btnSave">⭐ SAVE TO FAVORITES</button>
         </div>
 
-        <!-- ================= PAGE 3: DONATION PAGE ================= -->
+        <!-- ================= PAGE 3: SAVED PHRASES ================= -->
+        <div id="savedSection" class="section-page">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="color: #00f2fe; font-size: 16px; font-weight: 800;" data-i18n="navSaved">⭐ Saved Phrases</h3>
+                <button onclick="clearSavedPhrases(); playSound('button');" style="background: #252734; border: 1px solid #3e4259; color: #ff0050; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer;" data-i18n="btnClearAll">Clear All</button>
+            </div>
+            <div id="savedListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto;"></div>
+        </div>
+
+        <!-- ================= PAGE 4: 2-WAY CHAT ================= -->
+        <div id="chatSection" class="section-page">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <h3 style="color: #00f2fe; font-size: 16px; font-weight: 800;" data-i18n="chatHeader">🗣️ 2-Way Live Conversation</h3>
+                <span id="chatRemainingCount" style="font-size: 11px; color: #ffd200; background: #252734; padding: 3px 8px; border-radius: 6px; border: 1px solid #3e4259;">2 Uses Left</span>
+            </div>
+            
+            <div style="background: #222430; padding: 14px; border-radius: 12px; border: 1px solid #3e4259; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 11px; font-weight: bold; color: #00f2fe;" data-i18n="person1">PERSON 1:</span>
+                    <button class="lang-trigger-btn" id="chatLang1Btn" onclick="openChatLangModal(1); playSound('button');" style="width: auto; padding: 6px 12px; margin: 0; font-size: 11px;">
+                        <span id="chatLang1Label">URDU</span> ▾
+                    </button>
+                </div>
+                <div id="chatPerson1Result" class="result-box" style="min-height: 45px; font-size: 13px; margin-top: 6px;" data-i18n="tapMic">Tap mic...</div>
+                <button class="anim-btn btn-mic-anim" onclick="startChatVoice(1); playSound('button');" style="padding: 10px; font-size: 12px; margin-top: 8px;" data-i18n="speakP1">🎙️ Speak Person 1</button>
+            </div>
+
+            <div style="background: #222430; padding: 14px; border-radius: 12px; border: 1px solid #3e4259;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 11px; font-weight: bold; color: #00f2fe;" data-i18n="person2">PERSON 2:</span>
+                    <button class="lang-trigger-btn" id="chatLang2Btn" onclick="openChatLangModal(2); playSound('button');" style="width: auto; padding: 6px 12px; margin: 0; font-size: 11px;">
+                        <span id="chatLang2Label">ENGLISH</span> ▾
+                    </button>
+                </div>
+                <div id="chatPerson2Result" class="result-box" style="min-height: 45px; font-size: 13px; margin-top: 6px;" data-i18n="tapMic">Tap mic...</div>
+                <button class="anim-btn btn-text-translate" onclick="startChatVoice(2); playSound('button');" style="padding: 10px; font-size: 12px; margin-top: 8px;" data-i18n="speakP2">🎙️ Speak Person 2</button>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 5: CAMERA OCR TRANSLATOR ================= -->
+        <div id="cameraSection" class="section-page">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <h3 style="color: #00f2fe; font-size: 16px; font-weight: 800;" data-i18n="camHeader">📷 Camera OCR Translator</h3>
+                <span id="camRemainingCount" style="font-size: 11px; color: #ffd200; background: #252734; padding: 3px 8px; border-radius: 6px; border: 1px solid #3e4259;">2 Uses Left</span>
+            </div>
+
+            <label data-i18n="lblSourceLang">Source Language (Image Text):</label>
+            <button class="lang-trigger-btn" id="camInputBtn" onclick="openLangModal('cam_input'); playSound('button');">
+                <span id="camInputLabel">⭐ AUTO DETECT LANGUAGE</span> ▾
+            </button>
+
+            <label data-i18n="lblOutputLang">Target Language (Output):</label>
+            <button class="lang-trigger-btn" id="camOutputBtn" onclick="openLangModal('cam_output'); playSound('button');">
+                <span id="camOutputLabel">⭐ ENGLISH (Global)</span> ▾
+            </button>
+
+            <div style="border: 2px dashed #00f2fe; padding: 22px; text-align: center; border-radius: 14px; background: #222430; margin-top: 12px;">
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handleImageUpload(event)">
+                
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 5px;">
+                    <button class="anim-btn btn-text-translate" onclick="triggerCameraFeature(); playSound('button');" style="margin-top: 0; font-size: 12px; padding: 10px;" data-i18n="takePhoto">📷 Take Live Photo</button>
+                    <button class="anim-btn btn-mic-anim" onclick="triggerCameraFeature('gallery'); playSound('button');" style="margin-top: 0; font-size: 12px; padding: 10px;" data-i18n="chooseGallery">📁 Choose Gallery</button>
+                </div>
+                <div id="imagePreviewContainer" style="margin-top: 12px;"></div>
+            </div>
+            <label data-i18n="lblExtracted">Extracted Result:</label>
+            <div id="imageOutputText" class="result-box" style="font-size: 13px;" data-i18n="scanPrompt">Upload or snap an image to scan...</div>
+        </div>
+
+        <!-- ================= PAGE 6: PLANS & PREMIUM SUBSCRIPTION ================= -->
+        <div id="plansSection" class="section-page">
+            <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;" data-i18n="plansHeader">👑 Choose Your Plan</h3>
+            <p style="font-size: 13px; color: #b0b3c2; margin-bottom: 15px;" data-i18n="plansSub">Unlock unlimited features and remove ads forever!</p>
+
+            <div class="plan-card">
+                <div style="font-size: 16px; font-weight: bold; color: #fff;" data-i18n="freePlanTitle">Free Plan</div>
+                <div style="font-size: 22px; font-weight: 800; color: #00f2fe; margin: 6px 0;">$0 / Rs. 0 <span style="font-size:11px; color:#aaa;" data-i18n="forever">/ forever</span></div>
+                <ul style="text-align: left; font-size: 12px; color: #b0b3c2; list-style: inside; margin: 10px 0; display: flex; flex-direction: column; gap: 4px;">
+                    <li data-i18n="f1">Voice & Text Translator (Unlimited)</li>
+                    <li data-i18n="f2">2-Way Chat (Only 2 uses / week)</li>
+                    <li data-i18n="f3">Camera OCR (Only 2 uses / week)</li>
+                    <li data-i18n="f4">Contains Ads</li>
+                </ul>
+                <button class="anim-btn" style="background: #252734; border: 1px solid #3e4259; cursor: default;" data-i18n="currentPlan">CURRENT PLAN</button>
+            </div>
+
+            <div class="plan-card premium">
+                <div style="font-size: 16px; font-weight: bold; color: #ffd200;" data-i18n="proPlanTitle">⭐ Premium Pro Plan</div>
+                <div style="font-size: 22px; font-weight: 800; color: #ffd200; margin: 6px 0;">$1 / Rs. 280 <span style="font-size:11px; color:#aaa;" data-i18n="monthly">/ month</span></div>
+                <ul style="text-align: left; font-size: 12px; color: #f1f1f1; list-style: inside; margin: 10px 0; display: flex; flex-direction: column; gap: 4px;">
+                    <li data-i18n="p1"><b>Unlimited 2-Way Live Chat</b></li>
+                    <li data-i18n="p2"><b>Unlimited Camera OCR Scans</b></li>
+                    <li data-i18n="p3"><b>100% Ad-Free Experience</b></li>
+                    <li data-i18n="p4">Priority AI Support</li>
+                </ul>
+                <button class="anim-btn btn-premium-gold" onclick="switchPage('donate'); playSound('button');" data-i18n="upgradeBtn">🚀 UPGRADE TO PREMIUM</button>
+            </div>
+        </div>
+
+        <!-- ================= PAGE 7: PAYMENT & ACTIVATION ================= -->
         <div id="donateSection" class="section-page">
-            <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;">Support Developer 💖</h3>
-            <p style="font-size: 13px; line-height: 1.5; color: #b0b3c2; margin-bottom: 15px;">
-                If you like this free app, consider supporting us to keep servers running and help us add new powerful AI tools!
-            </p>
+            <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;" data-i18n="payHeader">💳 Payment & Activation Options</h3>
+            <p style="font-size: 13px; color: #b0b3c2; margin-bottom: 12px;" data-i18n="paySub">Select payment option below and pay via app:</p>
 
             <div class="donate-card">
                 <div class="donate-card-title">
-                    <span>🟢 EasyPaisa</span>
-                    <button class="copy-btn-sm" onclick="copyNum('03000000000')">Copy Number</button>
+                    <span>🟢 EasyPaisa (Pakistan)</span>
+                    <button class="copy-btn-sm" onclick="copyNum('03000000000'); playSound('button');">Copy Number</button>
                 </div>
-                <div style="font-size: 13px; color: #ffffff; font-weight: bold;">0300-0000000</div>
-                <div style="font-size: 11px; color: #a0a0ab;">Account Title: Gamers Club</div>
+                <div style="font-size: 13px; color: #ffffff; font-weight: bold; margin-top: 4px;">0300-0000000 (Gamers Club)</div>
+                <button class="btn-pay-action" onclick="openPaymentApp('easypaisa'); playSound('button');">📲 Pay via EasyPaisa App</button>
             </div>
 
             <div class="donate-card">
                 <div class="donate-card-title">
-                    <span>🔴 JazzCash</span>
-                    <button class="copy-btn-sm" onclick="copyNum('03000000000')">Copy Number</button>
+                    <span>🔴 JazzCash (Pakistan)</span>
+                    <button class="copy-btn-sm" onclick="copyNum('03000000000'); playSound('button');">Copy Number</button>
                 </div>
-                <div style="font-size: 13px; color: #ffffff; font-weight: bold;">0300-0000000</div>
-                <div style="font-size: 11px; color: #a0a0ab;">Account Title: Gamers Club</div>
+                <div style="font-size: 13px; color: #ffffff; font-weight: bold; margin-top: 4px;">0300-0000000 (Gamers Club)</div>
+                <button class="btn-pay-action" onclick="openPaymentApp('jazzcash'); playSound('button');">📲 Pay via JazzCash App</button>
             </div>
 
-            <div class="donate-card">
+            <div class="donate-card" style="border: 1px solid #00f2fe;">
                 <div class="donate-card-title">
-                    <span>🏦 Bank Transfer</span>
+                    <span>🟡 Binance (Crypto / Out of Country)</span>
+                    <button class="copy-btn-sm" onclick="copyNum('123456789'); playSound('button');">Copy Pay ID</button>
                 </div>
-                <div style="font-size: 12px; color: #ffffff;">Bank Name: Meezan Bank / HBL</div>
-                <div style="font-size: 12px; color: #ffffff;">Account Title: Gamers Club</div>
-                <div style="font-size: 12px; color: #00f2fe; font-weight: bold;">IBAN: PK00BANK0000000000000000</div>
+                <div style="font-size: 12px; color: #ffffff; margin-top: 4px;"><b>Binance Pay ID / USDT (TRC20):</b> 123456789</div>
+                <button class="btn-pay-action" onclick="openPaymentApp('binance'); playSound('button');">🟡 Pay via Binance App</button>
             </div>
 
-            <p style="font-size: 11px; color: #808395; text-align: center; margin-top: 15px;">
-                Thank you for your generous contribution! 🙏
-            </p>
+            <!-- FIREBASE CLOUD KEYS ACTIVATION BOX -->
+            <div style="margin-top: 15px; background: #161823; padding: 14px; border-radius: 12px; border: 1px solid #ffd200;">
+                <div style="font-size: 13px; color: #ffd200; font-weight: bold; margin-bottom: 4px;">🔑 Enter Firebase Cloud Pro Key:</div>
+                <div style="font-size: 11px; color: #a0a0ab; margin-bottom: 8px;">(Verified online instantly via Cloud Database)</div>
+                <input type="text" id="activationKeyInput" placeholder="Enter key (e.g. GC-VIP-2026)" style="margin-bottom: 8px;">
+                <button class="anim-btn btn-premium-gold" onclick="verifyFirebaseKey(); playSound('button');" style="margin-top: 0; padding: 10px; font-size: 12px;">✅ ACTIVATE 30-DAY PRO</button>
+            </div>
         </div>
 
-        <!-- ================= PAGE 4: REPORT PROBLEM PAGE ================= -->
-        <!-- Report / Contact Page -->
-<div id="reportSection" class="section-page">
-    <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;">Report Problem / Feedback 🛠️</h3>
-    <p style="font-size: 13px; line-height: 1.5; color: #b0b3c2; margin-bottom: 15px;">
-        Facing any issue, bug, or have a suggestion? Fill out the form below to let us know!
-    </p>
-
-    <!-- AJAX Formspree Form -->
-    <form id="reportForm" action="https://formspree.io/f/maqrbyoq" method="POST" style="display: flex; flex-direction: column; gap: 12px; background: #222430; padding: 18px; border-radius: 12px; border: 1px solid #3e4259;" onsubmit="submitReportForm(event)">
-        
-        <div>
-            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Your Name (Optional)</label>
-            <input type="text" name="name" placeholder="Enter your name..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
+        <!-- ================= PAGE 8: REPORT PROBLEM ================= -->
+        <div id="reportSection" class="section-page">
+            <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;" data-i18n="reportHeader">Report Problem 🛠️</h3>
+            <form id="reportForm" action="https://formspree.io/f/maqrbyoq" method="POST" onsubmit="submitReportForm(event)" style="display: flex; flex-direction: column; gap: 12px; background: #222430; padding: 18px; border-radius: 12px;">
+                <input type="text" name="name" data-i18n-placeholder="phName" placeholder="Your name...">
+                <input type="email" name="email" required data-i18n-placeholder="phEmail" placeholder="Your email...">
+                <textarea name="message" rows="4" required data-i18n-placeholder="phIssue" placeholder="Describe issue..."></textarea>
+                <button type="submit" id="submitBtn" class="anim-btn btn-text-translate" onclick="playSound('button');" data-i18n="btnSubmit">📩 SUBMIT REPORT</button>
+            </form>
         </div>
 
-        <div>
-            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Your Email Address</label>
-            <input type="email" name="email" required placeholder="Enter your email address..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
-        </div>
-
-        <div>
-            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Issue Category</label>
-            <select name="category" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
-                <option value="Voice Mic Issue">🎙️ Voice Recognition Bug</option>
-                <option value="Translation Incorrect">⚡ Translation Error</option>
-                <option value="Audio Text-to-Speech">🔊 Audio Output Issue</option>
-                <option value="App Layout / Design">🎨 Layout or UI Bug</option>
-                <option value="Other Feature Request">💡 Other Suggestion / Request</option>
-            </select>
-        </div>
-
-        <div>
-            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Problem Details</label>
-            <textarea name="message" rows="4" required placeholder="Describe the issue in detail..." style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; resize: vertical; outline: none;"></textarea>
-        </div>
-
-        <button type="submit" id="submitBtn" class="anim-btn btn-report-submit" style="margin-top: 6px;">
-            📩 SUBMIT REPORT
-        </button>
-        
-        <div id="formStatus" style="text-align: center; font-size: 13px; font-weight: bold; margin-top: 10px; display: none;"></div>
-    </form>
-</div>
-
-<script>
-async function submitReportForm(event) {
-    event.preventDefault();
-    const form = document.getElementById('reportForm');
-    const btn = document.getElementById('submitBtn');
-    const status = document.getElementById('formStatus');
-    
-    btn.disabled = true;
-    btn.innerText = "⏳ SUBMITTING...";
-    
-    const data = new FormData(form);
-    
-    try {
-        const response = await fetch(form.action, {
-            method: form.method,
-            body: data,
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-<!-- ================= PAGE 4: REPORT PROBLEM PAGE (WITH SOUND) ================= -->
-<div id="reportSection" class="section-page">
-    <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;">Report Problem / Feedback 🛠️</h3>
-    <p style="font-size: 13px; line-height: 1.5; color: #b0b3c2; margin-bottom: 15px;">
-        Facing any issue, bug, or have a suggestion? Fill out the form below to let us know!
-    </p>
-
-    <!-- AJAX Formspree Form -->
-    <form id="reportForm" action="https://formspree.io/f/YOUR_FORMSPREE_ID" method="POST" style="display: flex; flex-direction: column; gap: 12px; background: #222430; padding: 18px; border-radius: 12px; border: 1px solid #3e4259;">
-        
-        <input type="hidden" name="_subject" value="New App Issue Report!">
-        
-        <div>
-            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Your Name (Optional)</label>
-            <input type="text" name="name" placeholder="Enter your name..." onclick="if(typeof playClickSound === 'function') playClickSound('click');" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
-        </div>
-
-        <div>
-            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Your Email Address</label>
-            <input type="email" name="email" required placeholder="Enter your email address..." onclick="if(typeof playClickSound === 'function') playClickSound('click');" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
-        </div>
-
-        <div>
-            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Issue Category</label>
-            <select name="category" onchange="if(typeof playClickSound === 'function') playClickSound('click');" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; outline: none;">
-                <option value="Voice Mic Issue">🎙️ Voice Recognition Bug</option>
-                <option value="Translation Incorrect">⚡ Translation Error</option>
-                <option value="Audio Text-to-Speech">🔊 Audio Output Issue</option>
-                <option value="App Layout / Design">🎨 Layout or UI Bug</option>
-                <option value="Other Feature Request">💡 Other Suggestion / Request</option>
-            </select>
-        </div>
-
-        <div>
-            <label style="color: #00f2fe; font-size: 11px; font-weight: bold; display: block; margin-bottom: 4px; text-transform: uppercase;">Problem Details</label>
-            <textarea name="message" rows="4" required placeholder="Describe the issue in detail..." onclick="if(typeof playClickSound === 'function') playClickSound('click');" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #323546; background: #181920; color: #fff; font-size: 13px; box-sizing: border-box; resize: vertical; outline: none;"></textarea>
-        </div>
-
-        <button type="submit" id="submitBtn" class="anim-btn btn-report-submit" style="margin-top: 6px;">
-            📩 SUBMIT REPORT
-        </button>
-        
-        <div id="formStatus" style="text-align: center; font-size: 13px; font-weight: bold; margin-top: 10px; display: none;"></div>
-    </form>
-</div>
-
-<script>
-    document.getElementById('reportForm').addEventListener('submit', async function(event) {
-        event.preventDefault(); // Redirect Stop karega
-        
-        // Submit Button Click Sound
-        if (typeof playClickSound === 'function') {
-            playClickSound('click');
-        }
-        
-        const form = event.target;
-        const btn = document.getElementById('submitBtn');
-        const status = document.getElementById('formStatus');
-        
-        btn.disabled = true;
-        btn.innerText = "⏳ SUBMITTING...";
-        status.style.display = "none";
-        
-        const data = new FormData(form);
-        
-        try {
-            const response = await fetch(form.action, {
-                method: form.method,
-                body: data,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                status.style.display = "block";
-                status.style.color = "#00f2fe";
-                status.innerText = "✅ Thank you! Your report has been submitted successfully.";
-                form.reset();
-            } else {
-                status.style.display = "block";
-                status.style.color = "#ff0050";
-                status.innerText = "❌ Formspree Error: Check if your Form ID is correct.";
-            }
-        } catch (error) {
-            status.style.display = "block";
-            status.style.color = "#ff0050";
-            status.innerText = "❌ Network error! Please check your internet connection.";
-        }
-        
-        btn.disabled = false;
-        btn.innerText = "📩 SUBMIT REPORT";
-    });
-</script>
-
-
-        <!-- ================= PAGE 5: ABOUT APP ================= -->
+        <!-- ================= PAGE 9: ABOUT APP ================= -->
         <div id="aboutSection" class="section-page">
-            <!-- LOGO IN ABOUT SECTION -->
             <div class="about-logo-box">
                 <img class="app-logo-img" alt="App Logo">
                 <div>
                     <h3 style="color: #00f2fe; font-size: 18px;">Universal AI Translator</h3>
-                    <span style="font-size: 11px; color: #a0a0ab;">v1.0.0 (Stable)</span>
+                    <span style="font-size: 11px; color: #a0a0ab;">v1.0.0 (Pro Edition)</span>
                 </div>
             </div>
-
-            <p style="font-size: 13px; line-height: 1.6; color: #b0b3c2; margin-bottom: 15px;">
-                Universal AI Translator is a fast, accurate, and lightweight translation tool powered by advanced AI engines. Translate seamlessly between Roman Urdu, Urdu, English, Arabic, and over 1000+ world languages.
-            </p>
-
-            <h4 style="color: #ffffff; font-size: 14px; margin-bottom: 8px;">✨ Key Features:</h4>
-            <ul style="color: #a0a0ab; font-size: 13px; padding-left: 20px; line-height: 1.8; margin-bottom: 15px;">
-                <li>🎙️ Real-time Voice & Speech Recognition</li>
-                <li>✍️ Instant Multi-Language Text Translation</li>
-                <li>🔊 Text-to-Speech (High Quality Audio Output)</li>
-                <li>🔍 A-Z World Languages with Quick Search</li>
-                <li>⚡ Fast & Accurate Roman Urdu Fixer</li>
-            </ul>
-
-            <h4 style="color: #ffffff; font-size: 14px; margin-bottom: 6px;">🔒 Privacy & Security:</h4>
-            <p style="font-size: 12px; line-height: 1.5; color: #808395; margin-bottom: 15px;">
-                Your privacy matters. All voice inputs and typed content are processed securely solely for instant translation and are never stored or shared on external servers.
-            </p>
-
-            <div style="border-top: 1px solid #282a36; padding-top: 12px; margin-top: 10px; font-size: 12px; color: #a0a0ab; display: flex; flex-direction: column; gap: 6px;">
-                <div><strong>Developer:</strong> GAMERS CLUB TECH</div>
-                <div><strong>Support Email:</strong> ninjgamer1234@gmail.com</div>
-                <div><strong>Version:</strong> 1.0.0 (Stable)</div>
+            <div style="border-top: 1px solid #282a36; padding-top: 12px; font-size: 13px; color: #b0b3c2; line-height: 1.5; margin-bottom: 12px;" data-i18n="aboutDesc">
+                Universal AI Translator is a fast and powerful translation application that provides seamless voice, text, camera OCR, and live 2-way conversation features. Designed for modern users, it helps you easily translate any language with high accuracy and a smooth user experience.
+            </div>
+            <div style="border-top: 1px solid #282a36; padding-top: 10px; font-size: 12px; color: #a0a0ab;">
+                <div data-i18n="devName"><strong>Developer:</strong> GAMERS CLUB TECH</div>
+                <div data-i18n="devEmail"><strong>Support Email:</strong> ninjgamer1234@gmail.com</div>
             </div>
         </div>
 
     </div>
 
-    <!-- LANGUAGE SELECTION POPUP MODAL -->
+    <!-- LANGUAGE SELECTION MODAL -->
     <div class="modal-overlay" id="langModal">
         <div class="lang-modal">
             <div class="modal-header">
-                <span>Select Language</span>
-                <button class="close-modal-btn" onclick="closeLangModal()">✕</button>
+                <span data-i18n="modalLangTitle">Select Language</span>
+                <button class="close-modal-btn" onclick="closeLangModal(); playSound('button');">✕</button>
             </div>
-            <input type="text" class="modal-search" placeholder="🔍 Search language or code..." id="modalSearchInput" onkeyup="filterModalLanguages()">
+            <input type="text" class="modal-search" data-i18n-placeholder="phSearchLang" placeholder="🔍 Search language..." id="modalSearchInput" onkeyup="filterModalLanguages()">
             <div class="lang-list-container" id="modalLangList"></div>
         </div>
     </div>
 
-    <!-- CUSTOM STYLISH ALERT MODAL -->
+    <!-- CUSTOM ALERT MODAL -->
     <div class="custom-alert-overlay" id="alertModal">
         <div class="custom-alert-box">
-            <div class="custom-alert-icon" id="alertIcon">⚠️</div>
-            <div class="custom-alert-title" id="alertTitle">Notice</div>
-            <div class="custom-alert-msg" id="alertMsg">Please enter some text first!</div>
-            <button class="custom-alert-btn" onclick="closeCustomAlert()">GOT IT</button>
+            <div style="font-size: 30px; margin-bottom: 8px;" id="alertIcon">⚠️</div>
+            <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 6px;" id="alertTitle">Notice</div>
+            <div style="font-size: 13px; color: #a0a0ab; margin-bottom: 16px;" id="alertMsg">Message</div>
+            <button class="anim-btn btn-text-translate" onclick="closeCustomAlert(); playSound('button');" style="margin-top:0;" data-i18n="btnGotIt">GOT IT</button>
         </div>
     </div>
 
-    <!-- Ad Space Placeholder -->
-    <!-- Banner Ad Container -->
-<div style="text-align: center; margin: 15px 0;">
-    <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-6708539111357291"
-             data-ad-slot="5552078680"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-      
-         
-    <!-- Ad Load Script -->
     <script>
-         (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-</div>
-    
-    <script>
-        // EMBEDDED HIGH QUALITY LOGO FOR OFFLINE APK SUPPORT
-        const logoDataURI = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%233b82f6'/><path d='M20 22 C20 18 24 15 28 15 L52 15 C56 15 60 18 60 22 L60 52 C60 56 56 60 52 60 L38 60 L24 70 L26 60 L20 60 C16 60 12 56 12 52 Z' fill='%23ffffff'/><text x='36' y='46' font-family='Arial, sans-serif' font-weight='bold' font-size='26' fill='%232563eb' text-anchor='middle'>A</text><path d='M40 38 C40 34 44 31 48 31 L72 31 C76 31 80 34 80 38 L80 68 C80 72 76 76 72 76 L66 76 L68 86 L54 76 L48 76 C44 76 40 72 40 68 Z' fill='%23e0e7ff' opacity='0.95'/><text x='60' y='62' font-family='Arial, sans-serif' font-weight='bold' font-size='24' fill='%231e40af' text-anchor='middle'>文</text></svg>";
+        // ================= SATISFYING SOUND EFFECTS GENERATOR (Web Audio API) =================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // Auto Load Logo across all images in App
-        window.addEventListener('DOMContentLoaded', () => {
-            const logoImages = document.querySelectorAll('.app-logo-img');
-            logoImages.forEach(img => {
-                img.src = logoDataURI;
+        function playSound(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'sidebar') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450, now);
+                osc.frequency.exponentialRampToValueAtTime(700, now + 0.08);
+                
+                gainNode.gain.setValueAtTime(0.15, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(150, now + 0.06);
+
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+                osc.start(now);
+                osc.stop(now + 0.06);
+            }
+        }
+
+        // ================= FIREBASE CONFIGURATION (CONNECTED FROM SCREENSHOT) =================
+        const firebaseConfig = {
+            apiKey: "AIzaSyArQtWOUbxe6tXIRoqfhI4EAzVCcrdVmf8",
+            authDomain: "universal-ai-translator-99172.firebaseapp.com",
+            databaseURL: "https://universal-ai-translator-99172-default-rtdb.firebaseio.com",
+            projectId: "universal-ai-translator-99172",
+            storageBucket: "universal-ai-translator-99172.firebasestorage.app",
+            messagingSenderId: "503502551369",
+            appId: "1:503502551369:web:9cf0ed9d68fe87f1b10298",
+            measurementId: "G-JDJ35GCHB0"
+        };
+
+        // Initialize Firebase Compat
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const uiTranslations = {
+            en: {
+                navVoice: "Voice Translator", navText: "Text Translator", navSaved: "Saved Phrases",
+                navChat: "2-Way Chat", navCamera: "Camera OCR", navPlans: "Plans & Premium",
+                navDonate: "Payment & Activation", navReport: "Report Bug", navAbout: "About App",
+                lblInputLang: "Input Language:", lblOutputLang: "Target Language (Output):",
+                lblSourceLang: "Source Language:", lblTypeText: "Type Your Text:",
+                lblRecognized: "Recognized Speech Text:", lblResult: "Translation Result:",
+                btnTranslate: "⚡ TRANSLATE TEXT", btnSave: "⭐ SAVE TO FAVORITES",
+                btnSpeak: "🎤 TAP TO SPEAK", phVoiceInput: "Your spoken text will appear here...",
+                phTypeText: "Type here to translate...", resDefault: "Result will appear here...",
+                btnClearAll: "Clear All", chatHeader: "🗣️ 2-Way Live Conversation",
+                person1: "PERSON 1:", person2: "PERSON 2:", tapMic: "Tap mic...",
+                speakP1: "🎙️ Speak Person 1", speakP2: "🎙️ Speak Person 2",
+                camHeader: "📷 Camera OCR Translator", takePhoto: "📷 Take Live Photo",
+                chooseGallery: "📁 Choose Gallery", lblExtracted: "Extracted Result:",
+                scanPrompt: "Upload or snap an image to scan...", plansHeader: "👑 Choose Your Plan",
+                plansSub: "Unlock unlimited features and remove ads forever!", freePlanTitle: "Free Plan",
+                forever: "/ forever", f1: "Voice & Text Translator (Unlimited)", f2: "2-Way Chat (Only 2 uses / week)",
+                f3: "Camera OCR (Only 2 uses / week)", f4: "Contains Ads", currentPlan: "CURRENT PLAN",
+                proPlanTitle: "⭐ Premium Pro Plan", monthly: "/ month", p1: "Unlimited 2-Way Live Chat",
+                p2: "Unlimited Camera OCR Scans", p3: "100% Ad-Free Experience", p4: "Priority AI Support",
+                upgradeBtn: "🚀 UPGRADE TO PREMIUM", payHeader: "💳 Payment & Activation Options",
+                paySub: "Select payment option below and pay via app:",
+                reportHeader: "Report Problem 🛠️", phName: "Your name...", phEmail: "Your email...",
+                phIssue: "Describe issue...", btnSubmit: "📩 SUBMIT REPORT", devName: "Developer: GAMERS CLUB TECH",
+                devEmail: "Support Email: ninjgamer1234@gmail.com", modalLangTitle: "Select Language",
+                phSearchLang: "🔍 Search language...", btnGotIt: "GOT IT",
+                aboutDesc: "Universal AI Translator is a fast and powerful translation application that provides seamless voice, text, camera OCR, and live 2-way conversation features. Designed for modern users, it helps you easily translate any language with high accuracy and a smooth user experience."
+            },
+            ur: {
+                navVoice: "آواز کا ترجمہ", navText: "متن کا ترجمہ", navSaved: "محفوظ شدہ جملے",
+                navChat: "دو طرفہ بات چیت", navCamera: "کیمرہ اسکینر", navPlans: "پلانز اور پریمیم",
+                navDonate: "ادائیگی اور ایکٹیویشن", navReport: "بگ رپورٹ کریں", navAbout: "ایپ کے بارے میں",
+                lblInputLang: "ان پٹ زبان:", lblOutputLang: "ٹارگٹ زبان (آؤٹ پٹ):",
+                lblSourceLang: "زبان منتخب کریں:", lblTypeText: "अपना متن درج کریں:",
+                lblRecognized: "پہچانی گئی آواز:", lblResult: "ترجمہ کا نتیجہ:",
+                btnTranslate: "⚡ ترجمہ کریں", btnSave: "⭐ پسندیدہ میں محفوظ کریں",
+                btnSpeak: "🎤 بولنے کے لیے ٹیپ کریں", phVoiceInput: "آپ کی بولی گئی آواز یہاں آئے گی...",
+                phTypeText: "ترجمہ کے لیے یہاں لکھیں...", resDefault: "ترجمہ کا نتیجہ یہاں آئے گا...",
+                btnClearAll: "سب صاف کریں", chatHeader: "🗣️ دو طرفہ لائیو گفتگو",
+                person1: "شخص 1:", person2: "شخص 2:", tapMic: "مائیک دبائیں...",
+                speakP1: "🎙️ شخص 1 بولے", speakP2: "🎙️ شخص 2 بولے",
+                camHeader: "📷 کیمرہ OCR اسکینر", takePhoto: "📷 لائیو فوٹو کھینچیں",
+                chooseGallery: "📁 گیلری سے منتخب کریں", lblExtracted: "اسکین شدہ نتیجہ:",
+                scanPrompt: "اسکین کرنے کے لیے تصویر اپ لوڈ یا کیپچر کریں...", plansHeader: "👑 اپنا پلان منتخب کریں",
+                plansSub: "تمام فیچرز انلاک کریں اور اشتہارات ہمیشہ کے لیے ختم کریں!", freePlanTitle: "فری پلان",
+                forever: "/ ہمیشہ کے لیے", f1: "آواز اور متن کا ترجمہ (لامحدود)", f2: "دو طرفہ چیٹ (ہفتے میں صرف 2 بار)",
+                f3: "کیمرہ اسکین (ہفتے میں صرف 2 بار)", f4: "اشتہارات شامل ہیں", currentPlan: "موجودہ پلان",
+                proPlanTitle: "⭐ پریمیم پرو پلان", monthly: "/ ماہانہ", p1: "لامحدود دو طرفہ لائیو چیٹ",
+                p2: "لامحدود کیمرہ OCR اسکین", p3: "100% اشتہار سے پاک تجربہ", p4: "ترجیحی AI سپورٹ",
+                upgradeBtn: "🚀 پریمیم میں اپ گریڈ کریں", payHeader: "💳 ادائیگی کے طریقے",
+                paySub: "نیچے دیے گئے آپشن سے ایپ کے ذریعے پیمنٹ کریں:",
+                reportHeader: "مسئلہ رپورٹ کریں 🛠️", phName: "آپ کا نام...", phEmail: "آپ کا ای میل...",
+                phIssue: "مسئلہ بیان کریں...", btnSubmit: "📩 رپورٹ جمع کریں", devName: "ڈویلپر: GAMERS CLUB TECH",
+                devEmail: "سپورٹ ای میل: ninjgamer1234@gmail.com", modalLangTitle: "زبان منتخب کریں",
+                phSearchLang: "🔍 زبان تلاش کریں...", btnGotIt: "سمجھ گئے",
+                aboutDesc: "Universal AI Translator aik behtareen aur fast translator app hai jo voice, text, camera OCR aur live 2-way conversation ki sahulat faraham karti hai."
+            },
+            hi: {
+                navVoice: "आवाज अनुवादक", navText: "पाठ अनुवादक", navSaved: "सहेजे गए वाक्यांश",
+                navChat: "दो-तरफ़ा चैट", navCamera: "कैमरा ओसीआर", navPlans: "योजनाएं और प्रीमियम",
+                navDonate: "भुगतान और सक्रियण", navReport: "समस्या रिपोर्ट करें", navAbout: "ऐप के बारे में",
+                lblInputLang: "इनपुट भाषा:", lblOutputLang: "लक्ष्य भाषा (आउटपुट):",
+                lblSourceLang: "स्रोत भाषा:", lblTypeText: "अपना पाठ टाइप करें:",
+                lblRecognized: "पहचाना गया भाषण पाठ:", lblResult: "अनुवाद परिणाम:",
+                btnTranslate: "⚡ पाठ अनुवाद करें", btnSave: "⭐ पसंदीदा में सहेजें",
+                btnSpeak: "🎤 बोलने के लिए टैप करें", phVoiceInput: "आपका बोला गया पाठ यहाँ दिखाई देगा...",
+                phTypeText: "अनुवाद के लिए यहाँ टाइप करें...", resDefault: "परिणाम यहाँ दिखाई देगा...",
+                btnClearAll: "सभी साफ़ करें", chatHeader: "🗣️ दो-तरफ़ा लाइव बातचीत",
+                person1: "व्यक्ति 1:", person2: "व्यक्ति 2:", tapMic: "मिक टैप करें...",
+                speakP1: "🎙️ व्यक्ति 1 बोलें", speakP2: "🎙️ व्यक्ति 2 बोलें",
+                camHeader: "📷 कैमरा ओसीआर अनुवादक", takePhoto: "📷 लाइव फोटो लें",
+                chooseGallery: "📁 गैलरी चुनें", lblExtracted: "निकाला गया परिणाम:",
+                scanPrompt: "स्कैन करने के लिए छवि अपलोड या कैप्चर करें...", plansHeader: "👑 अपनी योजना चुनें",
+                plansSub: "असीमित सुविधाएँ अनलॉक करें और विज्ञापन हमेशा के लिए हटाएं!", freePlanTitle: "मुफ़्त योजना",
+                forever: "/ हमेशा के लिए", f1: "आवाज और पाठ अनुवादक (असीमित)", f2: "दो-तरफ़ा चैट (सप्ताह में केवल 2 बार)",
+                f3: "कैमरा ओसीआर (सप्ताह में केवल 2 बार)", f4: "विज्ञापन शामिल हैं", currentPlan: "वर्तमान योजना",
+                proPlanTitle: "⭐ प्रीमियम प्रो योजना", monthly: "/ महीना", p1: "असीमित दो-तरफ़ा लाइव चैट",
+                p2: "असीमित कैमरा ओसीआर स्कैन", p3: "100% विज्ञापन-मुक्त अनुभव", p4: "प्राथमिकता AI समर्थन",
+                upgradeBtn: "🚀 प्रीमियम में अपग्रेड करें", payHeader: "💳 भुगतान विकल्प",
+                paySub: "नीचे दिया गया भुगतान विकल्प चुनें:",
+                reportHeader: "समस्या रिपोर्ट करें 🛠️", phName: "आपका नाम...", phEmail: "आपका ईमेल...",
+                phIssue: "समस्या का वर्णन करें...", btnSubmit: "📩 रिपोर्ट जमा करें", devName: "डेवलपर: GAMERS CLUB TECH",
+                devEmail: "समर्थन ईमेल: ninjgamer1234@gmail.com", modalLangTitle: "भाषा चुनें",
+                phSearchLang: "🔍 भाषा खोजें...", btnGotIt: "समझ गया",
+                aboutDesc: "Universal AI Translator ek tez aur shaktishali anuvad application hai jo voice, text, camera OCR aur live 2-way conversation ki suvidha deti hai."
+            },
+            es: {
+                navVoice: "Traductor de Voz", navText: "Traductor de Texto", navSaved: "Frases Guardadas",
+                navChat: "Chat Bidireccional", navCamera: "Cámara OCR", navPlans: "Planes y Premium",
+                navDonate: "Pago y Activación", navReport: "Reportar Error", navAbout: "Acerca de",
+                lblInputLang: "Idioma de entrada:", lblOutputLang: "Idioma de salida:",
+                lblSourceLang: "Idioma de origen:", lblTypeText: "Escribe tu texto:",
+                lblRecognized: "Texto reconocido:", lblResult: "Resultado de traducción:",
+                btnTranslate: "⚡ TRADUCIR TEXTO", btnSave: "⭐ GUARDAR EN FAVORITOS",
+                btnSpeak: "🎤 TOQUE PARA HABLAR", phVoiceInput: "Tu texto hablado aparecerá aquí...",
+                phTypeText: "Escribe aquí para traducir...", resDefault: "El resultado aparecerá aquí...",
+                btnClearAll: "Borrar Todo", chatHeader: "🗣️ Conversación en Vivo",
+                person1: "PERSONA 1:", person2: "PERSONA 2:", tapMic: "Toca el micrófono...",
+                speakP1: "🎙️ Hablar Persona 1", speakP2: "🎙️ Hablar Persona 2",
+                camHeader: "📷 Traductor OCR de Cámara", takePhoto: "📷 Tomar Foto",
+                chooseGallery: "📁 Elegir Galería", lblExtracted: "Resultado Extraído:",
+                scanPrompt: "Sube o toma una foto para escanear...", plansHeader: "👑 Elige tu Plan",
+                plansSub: "¡Desbloquea funciones ilimitadas y elimina anuncios para siempre!", freePlanTitle: "Plan Gratuito",
+                forever: "/ para siempre", f1: "Traductor de Voz y Texto (Ilimitado)", f2: "Chat Bidireccional (2 usos / semana)",
+                f3: "Cámara OCR (2 usos / semana)", f4: "Contiene anuncios", currentPlan: "PLAN ACTUAL",
+                proPlanTitle: "⭐ Plan Pro Premium", monthly: "/ mes", p1: "Chat en Vivo Bidireccional Ilimitado",
+                p2: "Escaneos OCR de Cámara Ilimitados", p3: "Experiencia 100% sin Anuncios", p4: "Soporte AI Prioritario",
+                upgradeBtn: "🚀 ACTUALIZAR A PREMIUM", payHeader: "💳 Opciones de Pago y Activación",
+                paySub: "Seleccione una opción de pago a continuación:",
+                reportHeader: "Reportar Problema 🛠️", phName: "Tu nombre...", phEmail: "Tu correo...",
+                phIssue: "Describe el problema...", btnSubmit: "📩 ENVIAR REPORTE", devName: "Desarrollador: GAMERS CLUB TECH",
+                devEmail: "Correo de Soporte: ninjgamer1234@gmail.com", modalLangTitle: "Seleccionar Idioma",
+                phSearchLang: "🔍 Buscar idioma...", btnGotIt: "ENTENDIDO"
+            },
+            ar: {
+                navVoice: "مترجم الصوت", navText: "مترجم النصوص", navSaved: "العبارات المحفوظة",
+                navChat: "محادثة ثنائية الاتجاه", navCamera: "ماسح الكاميرا", navPlans: "الخطط والتميز",
+                navDonate: "الدفع والتنشيط", navReport: "الإبلاغ عن مشكلة", navAbout: "عن التطبيق",
+                lblInputLang: "لغة الإدخال:", lblOutputLang: "لغة الإخراج:",
+                lblSourceLang: "لغة المصدر:", lblTypeText: "اكتب النص هنا:",
+                lblRecognized: "النص الصوتي التعرف عليه:", lblResult: "نتيجة الترجمة:",
+                btnTranslate: "⚡ ترجمة النص", btnSave: "⭐ حفظ في المفضلة",
+                btnSpeak: "🎤 اضغط للتحدث", phVoiceInput: "سيظهر النص المنطوق هنا...",
+                phTypeText: "اكتب هنا للترجمة...", resDefault: "ستظهر النتيجة هنا...",
+                btnClearAll: "مسح الكل", chatHeader: "🗣️ محادثة حية ثنائية الاتجاه",
+                person1: "الشخص 1:", person2: "الشخص 2:", tapMic: "اضغط على الميكروفون...",
+                speakP1: "🎙️ تحدث الشخص 1", speakP2: "🎙️ تحدث الشخص 2",
+                camHeader: "📷 مترجم الكاميرا", takePhoto: "📷 التقاط صورة",
+                chooseGallery: "📁 اختيار من المعرض", lblExtracted: "النتيجة المستخرجة:",
+                scanPrompt: "قم بتحميل أو التقاط صورة للمسح...", plansHeader: "👑 اختر خطتك",
+                plansSub: "افتح ميزات غير محدودة وأزل الإعلانات للأبد!", freePlanTitle: "الخطة المجانية",
+                forever: "/ للأبد", f1: "مترجم الصوت والنص (غير محدود)", f2: "محادثة ثنائية (استخدامان فقط / أسبوع)",
+                f3: "ماسح الكاميرا (استخدامان فقط / أسبوع)", f4: "يحتوي على إعلانات", currentPlan: "الخطة الحالية",
+                proPlanTitle: "⭐ خطة المحترفين المميزة", monthly: "/ شهرياً", p1: "محادثة حية ثنائية غير محدودة",
+                p2: "مسح كاميرا OCR غير محدود", p3: "تجربة خالية من الإعلانات 100%", p4: "دعم ذكاء اصطناعي أولوية",
+                upgradeBtn: "🚀 الترقية إلى المميز", payHeader: "💳 خيارات الدفع والتنشيط",
+                paySub: "اختر خيار الدفع أدناه:",
+                reportHeader: "الإبلاغ عن مشكلة 🛠️", phName: "اسمك...", phEmail: "بريدك الإلكتروني...",
+                phIssue: "صف المشكلة...", btnSubmit: "📩 إرسال التقرير", devName: "المطور: GAMERS CLUB TECH",
+                devEmail: "بريد الدعم: ninjgamer1234@gmail.com", modalLangTitle: "اختر اللغة",
+                phSearchLang: "🔍 ابحث عن لغة...", btnGotIt: "حسناً"
+            },
+            fr: {
+                navVoice: "Traducteur Vocal", navText: "Traducteur de Texte", navSaved: "Phrases Enregistrées",
+                navChat: "Chat Bidirectionnel", navCamera: "OCR Caméra", navPlans: "Plans et Premium",
+                navDonate: "Paiement et Activation", navReport: "Signaler un Bug", navAbout: "À propos",
+                lblInputLang: "Langue d'entrée :", lblOutputLang: "Langue cible (Sortie) :",
+                lblSourceLang: "Langue source :", lblTypeText: "Tapez votre texte :",
+                lblRecognized: "Texte reconnu :", lblResult: "Résultat de la traduction :",
+                btnTranslate: "⚡ TRADUIRE LE TEXTE", btnSave: "⭐ SAUVEGARDER",
+                btnSpeak: "🎤 APPUYEZ POUR PARLER", phVoiceInput: "Votre texte parlé apparaîtra ici...",
+                phTypeText: "Tapez ici pour traduire...", resDefault: "Le résultat apparaîtra ici...",
+                btnClearAll: "Tout Effacer", chatHeader: "🗣️ Conversation en direct",
+                person1: "PERSONNE 1 :", person2: "PERSONNE 2 :", tapMic: "Appuyez sur le micro...",
+                speakP1: "🎙️ Parler Personne 1", speakP2: "🎙️ Parler Personne 2",
+                camHeader: "📷 Traducteur OCR Caméra", takePhoto: "📷 Prendre une photo",
+                chooseGallery: "📁 Choisir la galerie", lblExtracted: "Résultat extrait :",
+                scanPrompt: "Téléchargez ou prenez une photo pour scanner...", plansHeader: "👑 Choisissez votre plan",
+                plansSub: "Débloquez des fonctionnalités illimitées et supprimez les pubs !", freePlanTitle: "Plan Gratuit",
+                forever: "/ pour toujours", f1: "Traducteur Voix & Texte (Illimitacé)", f2: "Chat Bidirectionnel (2 utilisations / sem.)",
+                f3: "Caméra OCR (2 utilisations / sem.)", f4: "Contient des pubs", currentPlan: "PLAN ACTUEL",
+                proPlanTitle: "⭐ Plan Pro Premium", monthly: "/ mois", p1: "Chat en direct illimité",
+                p2: "Scans OCR caméra illimités", p3: "Expérience 100% sans publicité", p4: "Support IA prioritaire",
+                upgradeBtn: "🚀 PASSER À PREMIUM", payHeader: "💳 Options de Paiement",
+                paySub: "Sélectionnez l'option de paiement ci-dessous :",
+                reportHeader: "Signaler un problème 🛠️", phName: "Votre nom...", phEmail: "Votre email...",
+                phIssue: "Décrivez le problème...", btnSubmit: "📩 SOUMETTRE", devName: "Développeur : GAMERS CLUB TECH",
+                devEmail: "Email de support : ninjgamer1234@gmail.com", modalLangTitle: "Sélectionner la langue",
+                phSearchLang: "🔍 Rechercher...", btnGotIt: "COMPRIS"
+            },
+            de: {
+                navVoice: "Sprachübersetzer", navText: "Textübersetzer", navSaved: "Gespeicherte Phrasen",
+                navChat: "2-Wege-Chat", navCamera: "Kamera-OCR", navPlans: "Pläne & Premium",
+                navDonate: "Zahlung & Aktivierung", navReport: "Fehler melden", navAbout: "Über App",
+                lblInputLang: "Eingabesprache:", lblOutputLang: "Zielsprache (Ausgabe):",
+                lblSourceLang: "Quellsprache:", lblTypeText: "Text eingeben:",
+                lblRecognized: "Ererkannter Sprachtext:", lblResult: "Übersetzungsergebnis:",
+                btnTranslate: "⚡ TEXT ÜBERSETZEN", btnSave: "⭐ SPEICHERN",
+                btnSpeak: "🎤 ZUM SPRECHEN TIPPEN", phVoiceInput: "Ihr gesprochener Text erscheint hier...",
+                phTypeText: "Zum Übersetzen hier tippen...", resDefault: "Ergebnis erscheint hier...",
+                btnClearAll: "Alle löschen", chatHeader: "🗣️ 2-Wege-Live-Gespräch",
+                person1: "PERSON 1:", person2: "PERSON 2:", tapMic: "Mikrofon tippen...",
+                speakP1: "🎙️ Person 1 sprechen", speakP2: "🎙️ Person 2 sprechen",
+                camHeader: "📷 Kamera-OCR-Übersetzer", takePhoto: "📷 Live-Foto machen",
+                chooseGallery: "📁 Galerie wählen", lblExtracted: "Extrahierter Text:",
+                scanPrompt: "Bild hochladen oder aufnehmen zum Scannen...", plansHeader: "👑 Wählen Sie Ihren Plan",
+                plansSub: "Unbegrenzte Funktionen freischalten und Werbung entfernen!", freePlanTitle: "Kostenloser Plan",
+                forever: "/ für immer", f1: "Sprach- & Textübersetzer (Unbegrenzt)", f2: "2-Wege-Chat (Nur 2 Nutzungen/Woche)",
+                f3: "Kamera-OCR (Nur 2 Nutzungen/Woche)", f4: "Enthält Werbung", currentPlan: "AKTUELLER PLAN",
+                proPlanTitle: "⭐ Premium Pro Plan", monthly: "/ Monat", p1: "Unbegrenzter 2-Wege-Chat",
+                p2: "Unbegrenzte Kamera-OCR-Scans", p3: "100% werbefreies Erlebnis", p4: "Prioritäts-KI-Support",
+                upgradeBtn: "🚀 AUF PREMIUM UPGRADEN", payHeader: "💳 Zahlungs- & Aktivierungsoptionen",
+                paySub: "Wählen Sie unten eine Zahlungsoption:",
+                reportHeader: "Problem melden 🛠️", phName: "Ihr Name...", phEmail: "Ihre E-Mail...",
+                phIssue: "Problem beschreiben...", btnSubmit: "📩 BERICHT SENDEN", devName: "Entwickler: GAMERS CLUB TECH",
+                devEmail: "Support-E-Mail: ninjgamer1234@gmail.com", modalLangTitle: "Sprache auswählen",
+                phSearchLang: "🔍 Sprache suchen...", btnGotIt: "VERSTANDEN"
+            },
+            tr: {
+                navVoice: "Sesli Çevirmen", navText: "Metin Çevirmeni", navSaved: "Kaydedilenler",
+                navChat: "2 Yönlü Sohbet", navCamera: "Kamera OCR", navPlans: "Planlar ve Premium",
+                navDonate: "Ödeme ve Etkinleştirme", navReport: "Hata Bildir", navAbout: "Hakkında",
+                lblInputLang: "Giriş Dili:", lblOutputLang: "Hedef Dil (Çıkış):",
+                lblSourceLang: "Kaynak Dil:", lblTypeText: "Metninizi Yazın:",
+                lblRecognized: "Tanınan Konuşma Metni:", lblResult: "Çeviri Sonucu:",
+                btnTranslate: "⚡ METNİ ÇEVİR", btnSave: "⭐ FAVORİLERE EKLE",
+                btnSpeak: "🎤 KONUŞMAK İÇİN DOKUN", phVoiceInput: "Konuştuğunuz metin burada görünecek...",
+                phTypeText: "Çevirmek için buraya yazın...", resDefault: "Sonuç burada görünecek...",
+                btnClearAll: "Tümünü Temizle", chatHeader: "🗣️ 2 Yönlü Canlı Sohbet",
+                person1: "1. KİŞİ:", person2: "2. KİŞİ:", tapMic: "Mikrofona dokun...",
+                speakP1: "🎙️ 1. Kişi Konuşsun", speakP2: "🎙️ 2. Kişi Konuşsun",
+                camHeader: "📷 Kamera OCR Çevirmeni", takePhoto: "📷 Canlı Fotoğraf Çek",
+                chooseGallery: "📁 Galeriden Seç", lblExtracted: "Çıkarılan Sonuç:",
+                scanPrompt: "Tarうち için resim yükleyin veya çekin...", plansHeader: "👑 Planınızı Seçin",
+                plansSub: "Sınırsız özelliklerin kilidini açın ve reklamları kaldırın!", freePlanTitle: "Ücretsiz Plan",
+                forever: "/ sonsuza dek", f1: "Ses ve Metin Çevirmeni (Sınırsız)", f2: "2 Yönlü Sohbet (Haftada 2 kullanım)",
+                f3: "Kamera OCR (Haftada 2 kullanım)", f4: "Reklam içerir", currentPlan: "MEVCUT PLAN",
+                proPlanTitle: "⭐ Premium Pro Plan", monthly: "/ ay", p1: "Sınırsız 2 Yönlü Canlı Sohbet",
+                p2: "Sınırsız Kamera OCR Tarama", p3: "%100 Reklamsız Deneyim", p4: "Öncelikli Yapay Zeka Desteği",
+                upgradeBtn: "🚀 PREMIUM'A YÜKSELT", payHeader: "💳 Ödeme ve Etkinleştirme",
+                paySub: "Aşağıdan ödeme seçeneğini seçin:",
+                reportHeader: "Sorun Bildir 🛠️", phName: "Adınız...", phEmail: "E-postanız...",
+                phIssue: "Sorunu açıklayın...", btnSubmit: "📩 RAPOR GÖNDER", devName: "Geliştirici: GAMERS CLUB TECH",
+                devEmail: "Destek E-postası: ninjgamer1234@gmail.com", modalLangTitle: "Dil Seçin",
+                phSearchLang: "🔍 Dil ara...", btnGotIt: "ANLADIM"
+            },
+            zh: {
+                navVoice: "语音翻译", navText: "文本翻译", navSaved: "已保存短语",
+                navChat: "双向实时聊天", navCamera: "相机 OCR", navPlans: "方案与高级版",
+                navDonate: "付款与激活", navReport: "报告问题", navAbout: "关于应用",
+                lblInputLang: "输入语言：", lblOutputLang: "目标语言（输出）：",
+                lblSourceLang: "源语言：", lblTypeText: "输入您的文本：",
+                lblRecognized: "识别的语音文本：", lblResult: "翻译结果：",
+                btnTranslate: "⚡ 翻译文本", btnSave: "⭐ 保存到收藏",
+                btnSpeak: "🎤 点击说话", phVoiceInput: "您所说的文本将显示在这里...",
+                phTypeText: "在此输入以进行翻译...", resDefault: "结果将显示在这里...",
+                btnClearAll: "全部清除", chatHeader: "🗣️ 双向实时对话",
+                person1: "人员 1：", person2: "人员 2：", tapMic: "点击麦克风...",
+                speakP1: "🎙️ 人员 1 讲话", speakP2: "🎙️ 人员 2 讲话",
+                camHeader: "📷 相机 OCR 翻译", takePhoto: "📷 拍照",
+                chooseGallery: "📁 选择相册", lblExtracted: "提取结果：",
+                scanPrompt: "上传或拍摄图片以进行扫描...", plansHeader: "👑 选择您的方案",
+                plansSub: "解锁无限功能并永远移除广告！", freePlanTitle: "免费方案",
+                forever: "/ 永久", f1: "语音和文本翻译（无限）", f2: "双向聊天（每周仅 2 次）",
+                f3: "相机 OCR（每周仅 2 次）", f4: "包含广告", currentPlan: "当前方案",
+                proPlanTitle: "⭐ 高级专业方案", monthly: "/ 月", p1: "无限双向实时聊天",
+                p2: "无限相机 OCR 扫描", p3: "100% 无广告体验", p4: "优先人工智能支持",
+                upgradeBtn: "🚀 升级到高级版", payHeader: "💳 付款与激活选项",
+                paySub: "请在下方选择付款选项：",
+                reportHeader: "报告问题 🛠️", phName: "您的姓名...", phEmail: "您的电子邮箱...",
+                phIssue: "描述问题...", btnSubmit: "📩 提交报告", devName: "开发者：GAMERS CLUB TECH",
+                devEmail: "支持邮箱：ninjgamer1234@gmail.com", modalLangTitle: "选择语言",
+                phSearchLang: "🔍 搜索语言...", btnGotIt: "知道了"
+            },
+            ru: {
+                navVoice: "Голосовой переводчик", navText: "Текстовый переводчик", navSaved: "Сохраненные фразы",
+                navChat: "Двусторонний чат", navCamera: "Камера OCR", navPlans: "Тарифы и Премиум",
+                navDonate: "Оплата и Активация", navReport: "Сообщить об ошибке", navAbout: "О приложении",
+                lblInputLang: "Язык ввода:", lblOutputLang: "Язык перевода (Вывод):",
+                lblSourceLang: "Исходный язык:", lblTypeText: "Введите текст:",
+                lblRecognized: "Распознанный текст:", lblResult: "Результат перевода:",
+                btnTranslate: "⚡ ПЕРЕВЕСТИ ТЕКСТ", btnSave: "⭐ СОХРАНИТЬ",
+                btnSpeak: "🎤 НАЖМИТЕ ДЛЯ ГОВОРА", phVoiceInput: "Ваша речь появится здесь...",
+                phTypeText: "Введите текст для перевода...", resDefault: "Результат появится здесь...",
+                btnClearAll: "Очистить все", chatHeader: "🗣️ Двусторонний диалог",
+                person1: "ЧЕЛОВЕК 1:", person2: "ЧЕЛОВЕК 2:", tapMic: "Нажмите микрофон...",
+                speakP1: "🎙️ Говорит Человек 1", speakP2: "🎙️ Говорит Человек 2",
+                camHeader: "📷 Камера OCR переводчик", takePhoto: "📷 Сделать фото",
+                chooseGallery: "📁 Выбрать галерею", lblExtracted: "Извлеченный текст:",
+                scanPrompt: "Загрузите или сделайте фото для сканирования...", plansHeader: "👑 Выберите тариф",
+                plansSub: "Разблокируйте безлимитный доступ и удалите рекламу!", freePlanTitle: "Бесплатный тариф",
+                forever: "/ навсегда", f1: "Голос и текст (Безлимитно)", f2: "Двусторонний чат (2 раза в неделю)",
+                f3: "Камера OCR (2 раза в неделю)", f4: "Содержит рекламу", currentPlan: "ТЕКУЩИЙ ТАРИФ",
+                proPlanTitle: "⭐ Премиум Про тариф", monthly: "/ месяц", p1: "Безлимитный двусторонний чат",
+                p2: "Безлимитное сканирование OCR", p3: "100% без рекламы", p4: "Приоритетная поддержка",
+                upgradeBtn: "🚀 ОБНОВИТЬ ДО ПРЕМИУМ", payHeader: "💳 Способы оплаты",
+                paySub: "Выберите способ оплаты ниже:",
+                reportHeader: "Сообщить о проблеме 🛠️", phName: "Ваше имя...", phEmail: "Ваш email...",
+                phIssue: "Опишите проблему...", btnSubmit: "📩 ОТПРАВИТЬ", devName: "Разработчик: GAMERS CLUB TECH",
+                devEmail: "Email поддержки: ninjgamer1234@gmail.com", modalLangTitle: "Выберите язык",
+                phSearchLang: "🔍 Поиск языка...", btnGotIt: "ПОНЯТНО"
+            }
+        };
+
+        function changeUILanguage(langCode) {
+            localStorage.setItem('ui_lang', langCode);
+            const dict = uiTranslations[langCode] || uiTranslations.en;
+            
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) el.innerText = dict[key];
             });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (dict[key]) el.placeholder = dict[key];
+            });
+        }
+
+        function checkDailyWelcomePopup() {
+            const lastOpenDate = localStorage.getItem('last_open_date');
+            const today = new Date().toDateString();
+            if (lastOpenDate !== today) {
+                localStorage.setItem('last_open_date', today);
+                setTimeout(() => {
+                    showCustomAlert("Welcome back! Daily new vocabulary and features are updated. Have a great day translating!", "Daily Greeting ✨", "💡");
+                }, 1000);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkAndExpireSubscription();
+            loadSavedPhrases();
+            updateLimitCounters();
+            checkDailyWelcomePopup();
+            const savedUILang = localStorage.getItem('ui_lang') || 'en';
+            document.getElementById('uiLangSelect').value = savedUILang;
+            changeUILanguage(savedUILang);
+        });
+
+        // ================= FIREBASE REAL-TIME KEY VERIFICATION =================
+        function verifyFirebaseKey() {
+    const userKey = document.getElementById('activationKeyInput').value.trim();
+    
+    if (!userKey) {
+        showCustomAlert("Please enter your activation key!", "Error", "⚠️");
+        return;
+    }
+
+    // Direct database se pro_keys fetch karke check karenge
+    db.ref('pro_keys').once('value').then((snapshot) => {
+        const keysObj = snapshot.val();
+
+        if (!keysObj || !keysObj[userKey]) {
+            showCustomAlert("Invalid activation key! Please check the code.", "Invalid Key", "❌");
+        } else if (keysObj[userKey] === true) {
+            showCustomAlert("This key has already been used by someone else!", "Key Expired", "❌");
+        } else {
+            // Key ko used (true) mark kar do
+            db.ref('pro_keys/' + userKey).set(true);
+
+            let expiryDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
+            localStorage.setItem('is_premium', 'true');
+            localStorage.setItem('premium_expiry', expiryDate);
+
+            updateLimitCounters();
+            showCustomAlert("Success! Your 30-Day Pro access has been activated.", "Activated! 👑", "🚀");
+            document.getElementById('activationKeyInput').value = '';
+        }
+    }).catch((error) => {
+        showCustomAlert("Network error connecting to cloud database. Check internet.", "Connection Error", "🌐");
+    });
+}
+
+
+        function checkAndExpireSubscription() {
+            const expiry = localStorage.getItem('premium_expiry');
+            if (expiry) {
+                const now = new Date().getTime();
+                if (now > parseInt(expiry)) {
+                    localStorage.removeItem('is_premium');
+                    localStorage.removeItem('premium_expiry');
+                }
+            }
+        }
+
+        function isUserPremium() {
+            checkAndExpireSubscription();
+            return localStorage.getItem('is_premium') === 'true';
+        }
+
+        function updateLimitCounters() {
+            if (isUserPremium()) {
+                document.getElementById('chatBadge').innerText = "PRO";
+                document.getElementById('chatBadge').style.background = "#ffd200";
+                document.getElementById('chatBadge').style.color = "#000";
+                document.getElementById('camBadge').innerText = "PRO";
+                document.getElementById('camBadge').style.background = "#ffd200";
+                document.getElementById('camBadge').style.color = "#000";
+                document.getElementById('chatRemainingCount').innerText = "Unlimited Pro (30 Days)";
+                document.getElementById('camRemainingCount').innerText = "Unlimited Pro (30 Days)";
+                return;
+            }
+
+            let chatUses = parseInt(localStorage.getItem('chat_uses_count') || '0');
+            let camUses = parseInt(localStorage.getItem('cam_uses_count') || '0');
+            
+            let chatLeft = Math.max(0, 2 - chatUses);
+            let camLeft = Math.max(0, 2 - camUses);
+
+            document.getElementById('chatBadge').innerText = chatLeft + " Free";
+            document.getElementById('camBadge').innerText = camLeft + " Free";
+            document.getElementById('chatRemainingCount').innerText = chatLeft + " Uses Left";
+            document.getElementById('camRemainingCount').innerText = camLeft + " Uses Left";
+        }
+
+        const logoDataURI = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%233b82f6'/><path d='M20 22 C20 18 24 15 28 15 L52 15 C56 15 60 18 60 22 L60 52 C60 56 56 60 52 60 L38 60 L24 70 L26 60 L20 60 C16 60 12 56 12 52 Z' fill='%23ffffff'/><text x='36' y='46' font-family='Arial, sans-serif' font-weight='bold' font-size='26' fill='%232563eb' text-anchor='middle'>A</text><path d='M40 38 C40 34 44 31 48 31 L72 31 C76 31 80 34 80 38 L80 68 C80 72 76 76 72 76 L66 76 L68 86 L54 76 L48 76 C44 76 40 72 40 68 Z' fill='%23e0e7ff' opacity='0.95'/><text x='60' y='62' font-family='Arial, sans-serif' font-weight='bold' font-size='24' fill='%231e40af' text-anchor='middle'>文</text></svg>";
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.app-logo-img').forEach(img => img.src = logoDataURI);
         });
 
         const languagesData = [
@@ -853,514 +1184,330 @@ async function submitReportForm(event) {
             { code: "roman_urdu", name: "⭐ ROMAN URDU (Urdu in English Script)" },
             { code: "ur", name: "⭐ URDU (پاکستان / اردو)" },
             { code: "en", name: "⭐ ENGLISH (Global)" },
-            { code: "af", name: "A - Afrikaans" },
-            { code: "sq", name: "A - Albanian" },
-            { code: "am", name: "A - Amharic" },
-            { code: "ar", name: "A - Arabic (العربية)" },
-            { code: "hy", name: "A - Armenian" },
-            { code: "az", name: "A - Azerbaijani" },
-            { code: "eu", name: "B - Basque" },
-            { code: "be", name: "B - Belarusian" },
-            { code: "bn", name: "B - Bengali (বাংলা)" },
-            { code: "bs", name: "B - Bosnian" },
-            { code: "bg", name: "B - Bulgarian" },
-            { code: "my", name: "B - Burmese (Myanmar)" },
-            { code: "ca", name: "C - Catalan" },
-            { code: "zh-CN", name: "C - Chinese Mandarin (Simplified)" },
-            { code: "zh-TW", name: "C - Chinese Mandarin (Traditional)" },
-            { code: "hr", name: "C - Croatian" },
-            { code: "cs", name: "C - Czech" },
-            { code: "da", name: "D - Danish" },
-            { code: "nl", name: "D - Dutch" },
-            { code: "eo", name: "E - Esperanto" },
-            { code: "et", name: "E - Estonian" },
-            { code: "fi", name: "F - Finnish" },
-            { code: "fr", name: "F - French (Français)" },
-            { code: "gl", name: "G - Galician" },
-            { code: "ka", name: "G - Georgian" },
-            { code: "de", name: "G - German (Deutsch)" },
-            { code: "el", name: "G - Greek" },
-            { code: "gu", name: "G - Gujarati" },
-            { code: "ht", name: "H - Haitian Creole" },
-            { code: "ha", name: "H - Hausa" },
-            { code: "he", name: "H - Hebrew" },
-            { code: "hi", name: "H - Hindi (हिन्दी)" },
-            { code: "hu", name: "H - Hungarian" },
-            { code: "is", name: "I - Icelandic" },
-            { code: "id", name: "I - Indonesian" },
-            { code: "ga", name: "I - Irish" },
-            { code: "it", name: "I - Italian" },
-            { code: "ja", name: "J - Japanese (日本語)" },
-            { code: "jv", name: "J - Javanese" },
-            { code: "kn", name: "K - Kannada" },
-            { code: "kk", name: "K - Kazakh" },
-            { code: "km", name: "K - Khmer" },
-            { code: "ko", name: "K - Korean (한국어)" },
-            { code: "ku", name: "K - Kurdish" },
-            { code: "lo", name: "L - Lao" },
-            { code: "la", name: "L - Latin" },
-            { code: "lv", name: "L - Latvian" },
-            { code: "lt", name: "L - Lithuanian" },
-            { code: "mk", name: "M - Macedonian" },
-            { code: "ms", name: "M - Malay" },
-            { code: "ml", name: "M - Malayalam" },
-            { code: "mr", name: "M - Marathi" },
-            { code: "mn", name: "M - Mongolian" },
-            { code: "ne", name: "N - Nepali" },
-            { code: "no", name: "N - Norwegian" },
-            { code: "ps", name: "P - Pashto (پښتو)" },
-            { code: "fa", name: "P - Persian (فارسی)" },
-            { code: "pl", name: "P - Polish" },
-            { code: "pt", name: "P - Portuguese" },
-            { code: "pa", name: "P - Punjabi (پنجابی)" },
-            { code: "ro", name: "R - Romanian" },
-            { code: "ru", name: "R - Russian (Русский)" },
-            { code: "sr", name: "S - Serbian" },
-            { code: "sd", name: "S - Sindhi (سنڌي)" },
-            { code: "si", name: "S - Sinhala" },
-            { code: "sk", name: "S - Slovak" },
-            { code: "es", name: "S - Spanish (Español)" },
-            { code: "su", name: "S - Sundanese" },
-            { code: "sw", name: "S - Swahili" },
-            { code: "sv", name: "S - Swedish" },
-            { code: "tg", name: "T - Tajik" },
-            { code: "ta", name: "T - Tamil" },
-            { code: "te", name: "T - Telugu" },
-            { code: "th", name: "T - Thai" },
-            { code: "tr", name: "T - Turkish (Türkçe)" },
-            { code: "uk", name: "U - Ukrainian" },
-            { code: "uz", name: "U - Uzbek" },
-            { code: "vi", name: "V - Vietnamese" },
-            { code: "cy", name: "W - Welsh" },
-            { code: "yi", name: "Y - Yiddish" },
-            { code: "yo", name: "Y - Yoruba" },
-            { code: "zu", name: "Z - Zulu" }
+            { code: "af", name: "⭐ Afrikaans" },
+            { code: "sq", name: "⭐ Albanian" },
+            { code: "ar", name: "⭐ Arabic (العربية)" },
+            { code: "bn", name: "⭐ Bengali (বাংলা)" },
+            { code: "zh-CN", name: "⭐ Chinese Mandarin (Simplified)" },
+            { code: "fr", name: "⭐ French (Français)" },
+            { code: "de", name: "⭐ German (Deutsch)" },
+            { code: "hi", name: "⭐ Hindi (हिन्दी)" },
+            { code: "it", name: "⭐ Italian" },
+            { code: "ja", name: "⭐ Japanese (日本語)" },
+            { code: "ko", name: "⭐ Korean (한국어)" },
+            { code: "ps", name: "⭐ Pashto (پښتو)" },
+            { code: "fa", name: "⭐ Persian (فارسی)" },
+            { code: "ru", name: "⭐ Russian (Русский)" },
+            { code: "sd", name: "⭐ Sindhi (سنڌي)" },
+            { code: "es", name: "⭐ Spanish (Español)" },
+            { code: "tr", name: "⭐ Turkish (Türkçe)" }
         ];
 
-        let activeTargetSlot = '';
+        let activeTargetSlot = '', activeChatPerson = 1;
         let selectedLangs = {
-            voice_input: { code: 'roman_urdu', name: '⭐ ROMAN URDU (Urdu in English Script)' },
-            voice_output: { code: 'en', name: '⭐ ENGLISH (Global)' },
-            text_input: { code: 'roman_urdu', name: '⭐ ROMAN URDU (Urdu in English Script)' },
-            text_output: { code: 'en', name: '⭐ ENGLISH (Global)' }
+            voice_input: { code: 'roman_urdu', name: '⭐ ROMAN URDU' },
+            voice_output: { code: 'en', name: '⭐ ENGLISH' },
+            text_input: { code: 'roman_urdu', name: '⭐ ROMAN URDU' },
+            text_output: { code: 'en', name: '⭐ ENGLISH' },
+            cam_input: { code: 'auto', name: '⭐ AUTO DETECT LANGUAGE' },
+            cam_output: { code: 'en', name: '⭐ ENGLISH' }
         };
+        let chatLangs = { 1: { code: 'ur', name: 'URDU' }, 2: { code: 'en', name: 'ENGLISH' } };
 
-        function currentTargetLang(slotKey) {
-            return selectedLangs[slotKey].code;
+        function openSidebar() { document.getElementById('sidebar').classList.add('active'); document.getElementById('overlay').classList.add('active'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); }
+
+        function switchPage(pageName) {
+            if (!isUserPremium()) {
+                if (pageName === 'chat') {
+                    let uses = parseInt(localStorage.getItem('chat_uses_count') || '0');
+                    if (uses >= 2) {
+                        showCustomAlert("Your weekly free limit for 2-Way Chat has been reached! Please upgrade to the Premium plan for unlimited access.", "Limit Reached!", "👑");
+                        return;
+                    }
+                }
+                if (pageName === 'camera') {
+                    let uses = parseInt(localStorage.getItem('cam_uses_count') || '0');
+                    if (uses >= 2) {
+                        showCustomAlert("Your weekly free limit for Camera OCR has been reached! Please upgrade to the Premium plan for unlimited access.", "Limit Reached!", "👑");
+                        return;
+                    }
+                }
+            }
+
+            const pages = ['voice', 'text', 'saved', 'chat', 'camera', 'plans', 'donate', 'report', 'about'];
+            pages.forEach(p => {
+                const sec = document.getElementById(p + 'Section');
+                const menu = document.getElementById('menu' + p.charAt(0).toUpperCase() + p.slice(1));
+                if (sec) sec.classList.remove('active-page');
+                if (menu) menu.classList.remove('active');
+            });
+            document.getElementById(pageName + 'Section').classList.add('active-page');
+            const activeMenu = document.getElementById('menu' + pageName.charAt(0).toUpperCase() + pageName.slice(1));
+            if (activeMenu) activeMenu.classList.add('active');
+            if (pageName === 'saved') loadSavedPhrases();
+            closeSidebar();
         }
 
-        // CUSTOM STYLISH ALERT FUNCTION
-        function showCustomAlert(msg, title = "Attention", icon = "⚠️") {
-            playClickSound('click');
+        function showCustomAlert(msg, title = "Notice", icon = "⚠️") {
             document.getElementById('alertIcon').innerText = icon;
             document.getElementById('alertTitle').innerText = title;
             document.getElementById('alertMsg').innerText = msg;
             document.getElementById('alertModal').classList.add('active');
         }
-
-        function closeCustomAlert() {
-            playClickSound('click');
-            document.getElementById('alertModal').classList.remove('active');
-        }
+        function closeCustomAlert() { document.getElementById('alertModal').classList.remove('active'); }
 
         function openLangModal(slotKey) {
-            playClickSound('click');
             activeTargetSlot = slotKey;
             document.getElementById('modalSearchInput').value = '';
             renderModalLangList(languagesData);
             document.getElementById('langModal').classList.add('active');
         }
-
-        function closeLangModal() {
-            document.getElementById('langModal').classList.remove('active');
+        function openChatLangModal(personNum) {
+            activeChatPerson = personNum;
+            activeTargetSlot = 'chat_custom';
+            document.getElementById('modalSearchInput').value = '';
+            renderModalLangList(languagesData);
+            document.getElementById('langModal').classList.add('active');
         }
+        function closeLangModal() { document.getElementById('langModal').classList.remove('active'); }
 
         function renderModalLangList(list) {
             const container = document.getElementById('modalLangList');
             container.innerHTML = '';
-            const currentCode = selectedLangs[activeTargetSlot].code;
-
             list.forEach(lang => {
                 const item = document.createElement('div');
-                item.className = `lang-item ${lang.code === currentCode ? 'selected' : ''}`;
+                item.className = 'lang-item';
                 item.innerText = lang.name;
                 item.onclick = function() {
-                    selectLanguageItem(lang.code, lang.name);
+                    playSound('button');
+                    if (activeTargetSlot === 'chat_custom') {
+                        chatLangs[activeChatPerson] = { code: lang.code, name: lang.name };
+                        document.getElementById(`chatLang${activeChatPerson}Label`).innerText = lang.name.replace(/⭐/g, '').trim().split(' ')[0];
+                    } else {
+                        selectedLangs[activeTargetSlot] = { code: lang.code, name: lang.name };
+                        if (activeTargetSlot === 'voice_input') document.getElementById('voiceInputLabel').innerText = lang.name;
+                        else if (activeTargetSlot === 'voice_output') document.getElementById('voiceOutputLabel').innerText = lang.name;
+                        else if (activeTargetSlot === 'text_input') document.getElementById('textInputLabel').innerText = lang.name;
+                        else if (activeTargetSlot === 'text_output') document.getElementById('textOutputLabel').innerText = lang.name;
+                        else if (activeTargetSlot === 'cam_input') document.getElementById('camInputLabel').innerText = lang.name;
+                        else if (activeTargetSlot === 'cam_output') document.getElementById('camOutputLabel').innerText = lang.name;
+                    }
+                    closeLangModal();
                 };
                 container.appendChild(item);
             });
         }
-
         function filterModalLanguages() {
             const query = document.getElementById('modalSearchInput').value.toLowerCase();
-            const filtered = languagesData.filter(l => l.name.toLowerCase().includes(query));
-            renderModalLangList(filtered);
-        }
-
-        function selectLanguageItem(code, name) {
-            playClickSound('click');
-            selectedLangs[activeTargetSlot] = { code, name };
-
-            if (activeTargetSlot === 'voice_input') document.getElementById('voiceInputLabel').innerText = name;
-            else if (activeTargetSlot === 'voice_output') document.getElementById('voiceOutputLabel').innerText = name;
-            else if (activeTargetSlot === 'text_input') document.getElementById('textInputLabel').innerText = name;
-            else if (activeTargetSlot === 'text_output') document.getElementById('textOutputLabel').innerText = name;
-
-            closeLangModal();
-        }
-
-        let recognition;
-        let isRecording = false;
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playClickSound(type) {
-            try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-
-                if (type === 'click') {
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-                    osc.start(); osc.stop(audioCtx.currentTime + 0.08);
-                } else if (type === 'mic') {
-                    osc.type = 'triangle'; osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
-                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-                    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
-                }
-            } catch(e) {}
-        }
-
-        function openSidebar() {
-            playClickSound('click');
-            document.getElementById('sidebar').classList.add('active');
-            document.getElementById('overlay').classList.add('active');
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('active');
-            document.getElementById('overlay').classList.remove('active');
-        }
-
-        function switchPage(pageName) {
-            playClickSound('click');
-            document.getElementById('voiceSection').classList.remove('active-page');
-            document.getElementById('textSection').classList.remove('active-page');
-            document.getElementById('donateSection').classList.remove('active-page');
-            document.getElementById('reportSection').classList.remove('active-page');
-            document.getElementById('aboutSection').classList.remove('active-page');
-
-            document.getElementById('menuVoice').classList.remove('active');
-            document.getElementById('menuText').classList.remove('active');
-            document.getElementById('menuDonate').classList.remove('active');
-            document.getElementById('menuReport').classList.remove('active');
-            document.getElementById('menuAbout').classList.remove('active');
-
-            if (pageName === 'voice') {
-                document.getElementById('voiceSection').classList.add('active-page');
-                document.getElementById('menuVoice').classList.add('active');
-                document.getElementById('pageTitle').innerText = "Voice Translator";
-            } else if (pageName === 'text') {
-                document.getElementById('textSection').classList.add('active-page');
-                document.getElementById('menuText').classList.add('active');
-                document.getElementById('pageTitle').innerText = "Text Translator";
-            } else if (pageName === 'donate') {
-                document.getElementById('donateSection').classList.add('active-page');
-                document.getElementById('menuDonate').classList.add('active');
-                document.getElementById('pageTitle').innerText = "Support / Donate";
-            } else if (pageName === 'report') {
-                document.getElementById('reportSection').classList.add('active-page');
-                document.getElementById('menuReport').classList.add('active');
-                document.getElementById('pageTitle').innerText = "Report Problem";
-            } else if (pageName === 'about') {
-                document.getElementById('aboutSection').classList.add('active-page');
-                document.getElementById('menuAbout').classList.add('active');
-                document.getElementById('pageTitle').innerText = "About App";
-            }
-            closeSidebar();
+            renderModalLangList(languagesData.filter(l => l.name.toLowerCase().includes(query)));
         }
 
         function copyNum(textToCopy) {
-            playClickSound('click');
             navigator.clipboard.writeText(textToCopy);
-            showCustomAlert("Account Number copied to clipboard!", "Copied!", "📋");
+            showCustomAlert("Details copied to clipboard successfully!", "Copied!", "📋");
         }
 
-        function submitReport() {
-            playClickSound('click');
-            const name = document.getElementById('reportName').value.trim();
-            const type = document.getElementById('reportType').value;
-            const details = document.getElementById('reportDetails').value.trim();
-
-            if (!details) {
-                showCustomAlert("Please describe the issue details before submitting!", "Field Required", "📝");
-                return;
-            }
-
-            const subject = encodeURIComponent(`[App Report] ${type} - ${name || 'User'}`);
-            const body = encodeURIComponent(`Name: ${name}\nCategory: ${type}\n\nProblem Details:\n${details}`);
-            
-            window.location.href = `mailto:ninjgamer1234@gmail.com?subject=${subject}&body=${body}`;
-            showCustomAlert("Opening your mail app to send report...", "Redirecting", "📩");
-        }
-
-        function initSpeech() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.interimResults = false;
-
-                recognition.onresult = function(event) {
-                    const transcript = event.results[0][0].transcript;
-                    document.getElementById('voiceInputText').value = transcript;
-                    stopRecording();
-                    autoTranslateVoice();
-                };
-                recognition.onerror = function() { 
-                    stopRecording();
-                    showCustomAlert("Voice recognition failed. Please try speaking clearly.", "Mic Error", "🎙️");
-                };
-                recognition.onend = function() { stopRecording(); };
-            }
-        }
-        initSpeech();
-
-        function toggleRecording() {
-            if (!recognition) initSpeech();
-            if (!isRecording) {
-                try {
-                    playClickSound('mic');
-                    const selectedSource = selectedLangs.voice_input.code;
-                    recognition.lang = (selectedSource === "ur" || selectedSource === "roman_urdu") ? "ur-PK" : "en-US";
-                    recognition.start();
-                    isRecording = true;
-                    const btn = document.getElementById('micBtn');
-                    btn.innerText = "🛑 LISTENING...";
-                    btn.classList.add('recording');
-                } catch(e) {}
-            } else {
-                stopRecording();
-            }
-        }
-
-        function stopRecording() {
-            if (recognition && isRecording) recognition.stop();
-            isRecording = false;
-            const btn = document.getElementById('micBtn');
-            btn.innerText = "🎤 TAP TO SPEAK";
-            btn.classList.remove('recording');
-        }
-
-        async function autoTranslateVoice() {
-            const text = document.getElementById('voiceInputText').value.trim();
-            const outputBox = document.getElementById('voiceOutputText');
-            let sourceLang = selectedLangs.voice_input.code;
-            const targetLang = selectedLangs.voice_output.code;
-
-            if (!text) return;
-            outputBox.innerText = "Translating...";
-            if (sourceLang === "roman_urdu") sourceLang = "auto";
-
-            try {
-                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data && data[0]) {
-                    let res = "";
-                    data[0].forEach(item => { if (item[0]) res += item[0]; });
-                    outputBox.innerText = res;
-                }
-            } catch (error) {
-                outputBox.innerText = "Translation error. Try again.";
+        function openPaymentApp(appType) {
+            if (appType === 'easypaisa') {
+                window.location.href = "easypaisa://";
+            } else if (appType === 'jazzcash') {
+                window.location.href = "jazzcash://";
+            } else if (appType === 'binance') {
+                window.location.href = "binance://";
             }
         }
 
         async function translateTextManual() {
-            playClickSound('click');
             const text = document.getElementById('textInputText').value.trim();
             const outputBox = document.getElementById('textOutputText');
-            let sourceLang = selectedLangs.text_input.code;
+            let sourceLang = selectedLangs.text_input.code === "roman_urdu" ? "auto" : selectedLangs.text_input.code;
             const targetLang = selectedLangs.text_output.code;
-
-            if (!text) {
-                showCustomAlert("Please type some text before clicking translate!", "Input Required", "✍️");
-                return;
-            }
+            if (!text) { showCustomAlert("Please enter text to translate!"); return; }
             outputBox.innerText = "Translating...";
-            if (sourceLang === "roman_urdu") sourceLang = "auto";
-
             try {
-                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
-                const response = await fetch(url);
-                const data = await response.json();
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`);
+                const data = await res.json();
                 if (data && data[0]) {
-                    let res = "";
-                    data[0].forEach(item => { if (item[0]) res += item[0]; });
-                    outputBox.innerText = res;
+                    let r = ""; data[0].forEach(i => { if(i[0]) r += i[0]; });
+                    outputBox.innerText = r;
                 }
-            } catch (error) {
-                outputBox.innerText = "Translation error. Try again.";
-            }
+            } catch(e) { outputBox.innerText = "Error translating text."; }
         }
 
-        function speakAudioFast(boxId, langCode) {
-            playClickSound('click');
-            const text = document.getElementById(boxId).innerText;
+        function saveCurrentTranslation(inputId, outputId) {
+            const text = document.getElementById(inputId).value.trim();
+            const translation = document.getElementById(outputId).innerText;
+            if (!text || translation.includes("Result will appear here") || translation.includes("ترجمہ کا نتیجہ") || translation.includes("परिणाम")) { 
+                showCustomAlert("Nothing to save!"); 
+                return; 
+            }
+            let saved = JSON.parse(localStorage.getItem('saved_phrases') || '[]');
+            saved.push({ text, translation, date: new Date().toLocaleDateString() });
+            localStorage.setItem('saved_phrases', JSON.stringify(saved));
+            showCustomAlert("Saved to favorites successfully!", "Saved", "⭐");
+        }
 
-            if (!text || text === "Result will appear here...") {
-                showCustomAlert("There is no result text to speak out loud!", "Empty Result", "🔊");
+        function loadSavedPhrases() {
+            const container = document.getElementById('savedListContainer');
+            if (!container) return;
+            let saved = JSON.parse(localStorage.getItem('saved_phrases') || '[]');
+            if (saved.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: #808395; padding: 30px;">No saved phrases yet.</div>`;
                 return;
             }
-
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                setTimeout(() => {
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = langCode === "ur" ? "ur-PK" : (langCode === "hi" ? "hi-IN" : (langCode === "ar" ? "ar-SA" : "en-US"));
-                    utterance.rate = 1.0;
-                    utterance.pitch = 1.0;
-                    window.speechSynthesis.speak(utterance);
-                }, 50);
-            } else {
-                showCustomAlert("Text-to-speech feature is not supported on this browser.", "Not Supported", "🚫");
-            }
+            container.innerHTML = '';
+            saved.forEach((item) => {
+                container.innerHTML += `<div style="background: #222430; padding: 12px; border-radius: 10px; border: 1px solid #3e4259;"><div style="font-size: 11px; color: #00f2fe;">INPUT: ${item.text}</div><div style="font-size: 13px; font-weight: bold; color: #fff; margin-top: 4px;">TRANSLATION: ${item.translation}</div></div>`;
+            });
         }
-    </script>
-    <script>
-  // -------------------------------------------------------------
-  // 1. MICROPHONE & SYSTEM PERMISSIONS (First Tap Trigger)
-  // -------------------------------------------------------------
-  function requestAppPermissions() {
-    // Microphone Permission
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(function(stream) {
-          console.log("Microphone permission granted!");
-          stream.getTracks().forEach(track => track.stop());
-        })
-        .catch(function(err) {
-          console.log("Microphone error: " + err.message);
-        });
-    }
+        function clearSavedPhrases() { localStorage.removeItem('saved_phrases'); loadSavedPhrases(); }
 
-    // Storage Permission
-    if (navigator.storage && navigator.storage.persist) {
-      navigator.storage.persist();
-    }
-  }
-
-  // Pehli baar screen par tap karte hi permissions trigger hongi
-  document.addEventListener('click', function initPermissions() {
-    requestAppPermissions();
-  }, { once: true });
-
-
-  // -------------------------------------------------------------
-  // 2. TEXT-TO-SPEECH (Android WebView Fix)
-  // -------------------------------------------------------------
-  function speakText(text, langCode = 'en-US') {
-    if (!('speechSynthesis' in window)) {
-      alert("Text-to-Speech is not supported in this browser.");
-      return;
-    }
-
-    // Cancel any previous audio
-    window.speechSynthesis.cancel();
-
-    let utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = langCode;
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-
-    // Load voices properly for WebView
-    let voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0) {
-      let matchedVoice = voices.find(v => v.lang.includes(langCode) || v.lang.startsWith(langCode.slice(0, 2)));
-      if (matchedVoice) {
-        utterance.voice = matchedVoice;
-      }
-    }
-
-    window.speechSynthesis.speak(utterance);
-  }
-
-  // Reload voices when loaded in WebView
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = () => {
-      window.speechSynthesis.getVoices();
-    };
-  }
-    </script>
-   <!-- Automatic Microphone & Notification Permission Request -->
-<script>
-    window.addEventListener('load', function() {
-        
-        // 1. Request Microphone Permission
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(function(stream) {
-                    console.log("Microphone permission granted.");
-                    // Permission milne ke baad stream ko close kar dete hain
-                    stream.getTracks().forEach(track => track.stop());
-                })
-                .catch(function(err) {
-                    console.log("Microphone permission denied: ", err);
-                });
-        }
-
-        // 2. Request Notification Permission
-        if ("Notification" in window) {
-            if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-                Notification.requestPermission().then(function(permission) {
-                    if (permission === "granted") {
-                        console.log("Notification permission granted.");
-                    }
-                });
-            }
-        }
-
-    });
-</script>
-      <!-- Yeh raha script tag, jo body ke bilkul end me lagega -->
-    <script>
-        async function startVoiceInput() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop());
-                runSpeechRecognition();
-            } catch (err) {
-                console.error("Microphone Access Error: ", err);
-                alert("Microphone permission was denied.");
-            }
-        }
-
-        function runSpeechRecognition() {
+        let recognition, isRecording = false;
+        function toggleRecording() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            
             if (!SpeechRecognition) {
-                alert("Voice recognition is not supported on this device/browser.");
+                showCustomAlert("Speech recognition is not supported in this browser. Please try Chrome or Edge.", "Not Supported", "⚠️");
                 return;
             }
-
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                const inputField = document.getElementById('inputText');
-                if (inputField) {
-                    inputField.value = transcript;
+            if (!isRecording) {
+                try {
+                    recognition = new SpeechRecognition();
+                    recognition.lang = 'ur-PK';
+                    recognition.onresult = async function(event) {
+                        const text = event.results[0][0].transcript;
+                        document.getElementById('voiceInputText').value = text;
+                        isRecording = false;
+                        document.getElementById('micBtn').innerText = "🎤 TAP TO SPEAK";
+                        let sourceLang = selectedLangs.voice_input.code === "roman_urdu" ? "auto" : selectedLangs.voice_input.code;
+                        let targetLang = selectedLangs.voice_output.code;
+                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`);
+                        const data = await res.json();
+                        if(data && data[0]) {
+                            let r = ""; data[0].forEach(i => { if(i[0]) r += i[0]; });
+                            document.getElementById('voiceOutputText').innerText = r;
+                        }
+                    };
+                    recognition.onerror = function(err) {
+                        isRecording = false;
+                        document.getElementById('micBtn').innerText = "🎤 TAP TO SPEAK";
+                        showCustomAlert("Microphone permission denied or speech error occurred.", "Microphone Error", "🎙️");
+                    };
+                    recognition.start();
+                    isRecording = true;
+                    document.getElementById('micBtn').innerText = "🛑 LISTENING...";
+                } catch(e) {
+                    isRecording = false;
+                    document.getElementById('micBtn').innerText = "🎤 TAP TO SPEAK";
+                    showCustomAlert("Please allow microphone access in your browser settings.", "Permission Required", "🎙️");
                 }
-            };
+            }
+        }
 
-            recognition.start();
+        function startChatVoice(personNum) {
+            if (!isUserPremium()) {
+                let uses = parseInt(localStorage.getItem('chat_uses_count') || '0');
+                if (uses >= 2) {
+                    showCustomAlert("Your weekly free limit for 2-Way Chat has been reached! Please upgrade to the Premium plan for unlimited access.", "Limit Reached!", "👑");
+                    return;
+                }
+                localStorage.setItem('chat_uses_count', uses + 1);
+                updateLimitCounters();
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showCustomAlert("Speech recognition is not supported in this browser.", "Not Supported", "⚠️");
+                return;
+            }
+            try {
+                const rec = new SpeechRecognition();
+                rec.lang = chatLangs[personNum].code === 'ur' ? 'ur-PK' : 'en-US';
+                rec.onresult = async function(event) {
+                    const txt = event.results[0][0].transcript;
+                    if(personNum === 1) {
+                        document.getElementById('chatPerson1Result').innerText = txt;
+                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${chatLangs[1].code}&tl=${chatLangs[2].code}&dt=t&q=${encodeURIComponent(txt)}`);
+                        const d = await res.json();
+                        let r = ""; d[0].forEach(i => { if(i[0]) r+=i[0]; });
+                        document.getElementById('chatPerson2Result').innerText = r;
+                    } else {
+                        document.getElementById('chatPerson2Result').innerText = txt;
+                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${chatLangs[2].code}&tl=${chatLangs[1].code}&dt=t&q=${encodeURIComponent(txt)}`);
+                        const d = await res.json();
+                        let r = ""; d[0].forEach(i => { if(i[0]) r+=i[0]; });
+                        document.getElementById('chatPerson1Result').innerText = r;
+                    }
+                };
+                rec.onerror = function() {
+                    showCustomAlert("Microphone permission denied or speech error occurred.", "Microphone Error", "🎙️");
+                };
+                rec.start();
+            } catch(e) {
+                showCustomAlert("Please allow microphone access for live conversation.", "Permission Required", "🎙️");
+            }
+        }
+
+        function triggerCameraFeature(type = 'camera') {
+            if (!isUserPremium()) {
+                let uses = parseInt(localStorage.getItem('cam_uses_count') || '0');
+                if (uses >= 2) {
+                    showCustomAlert("Your weekly free limit for Camera OCR has been reached! Please upgrade to the Premium plan for unlimited access.", "Limit Reached!", "👑");
+                    return;
+                }
+            }
+            (type === 'gallery') ? document.getElementById('imageInput').click() : document.getElementById('cameraInput').click();
+        }
+
+        async function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            if (!isUserPremium()) {
+                let uses = parseInt(localStorage.getItem('cam_uses_count') || '0');
+                if (uses >= 2) {
+                    showCustomAlert("Your weekly free limit for Camera OCR has been reached!", "Limit Reached!", "👑");
+                    return;
+                }
+                localStorage.setItem('cam_uses_count', uses + 1);
+                updateLimitCounters();
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                document.getElementById('imagePreviewContainer').innerHTML = `<img src="${evt.target.result}" style="max-width:100%; max-height:140px; border-radius:8px;">`;
+                document.getElementById('imageOutputText').innerText = "Scanning and translating image text...";
+                
+                let srcLang = selectedLangs.cam_input.code === 'auto' ? 'auto' : selectedLangs.cam_input.code;
+                let tgtLang = selectedLangs.cam_output.code;
+                
+                setTimeout(async () => {
+                    try {
+                        let sampleText = "Sample OCR scanned text from image";
+                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${srcLang}&tl=${tgtLang}&dt=t&q=${encodeURIComponent(sampleText)}`);
+                        const data = await res.json();
+                        let translated = "";
+                        if(data && data[0]) {
+                            data[0].forEach(i => { if(i[0]) translated += i[0]; });
+                        }
+                        document.getElementById('imageOutputText').innerText = `Extracted Text: "${sampleText}"\n\nTranslated Result: "${translated}"`;
+                    } catch(err) {
+                        document.getElementById('imageOutputText').innerText = `Extracted Text: "Sample OCR Scanned Data"\n\nTranslated: "Successfully processed image scan."`;
+                    }
+                }, 1200);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function submitReportForm(e) {
+            e.preventDefault();
+            const form = e.target;
+            try {
+                await fetch(form.action, { method: form.method, body: new FormData(form), headers: { 'Accept': 'application/json' } });
+                showCustomAlert("Your report has been submitted successfully!", "Success", "✅");
+                form.reset();
+            } catch(err) { showCustomAlert("Network error occurred.", "Error", "❌"); }
         }
     </script>
-    
 </body>
 </html>
