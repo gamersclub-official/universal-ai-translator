@@ -1,17 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head> 
-    <!-- Google AdMob / AdSense SDK Script -->
     <meta name="monetag" content="78ff7366a3ee8ba6977c31e7962b536e">
- 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal AI Translator</title>
+    <!-- Tesseract OCR AI Library -->
+    <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
     
-    <!-- Firebase App & Database Compat SDKs (CDN) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
     <style>
         * {
             box-sizing: border-box;
@@ -31,7 +27,6 @@
             min-height: 100vh;
         }
         
-        /* App Header */
         .header-bar {
             width: 100%;
             background: #161823;
@@ -72,7 +67,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Sidebar Navigation Drawer */
         .sidebar {
             position: fixed;
             top: 0;
@@ -152,7 +146,6 @@
             display: block;
         }
 
-        /* App Main Container */
         .container {
             width: 100%;
             max-width: 500px;
@@ -225,7 +218,7 @@
             border-radius: 10px;
             min-height: 85px;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 15px;
             color: #00f2fe;
             word-wrap: break-word;
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
@@ -263,11 +256,6 @@
             background: linear-gradient(135deg, #2b5876, #4e4376);
             box-shadow: 0 4px 15px rgba(78, 67, 118, 0.4);
         }
-        .btn-premium-gold {
-            background: linear-gradient(135deg, #f7971e, #ffd200);
-            color: #0f1015;
-            box-shadow: 0 4px 20px rgba(247, 151, 30, 0.5);
-        }
         .btn-pay-action {
             background: linear-gradient(135deg, #00c6ff, #0072ff);
             color: #ffffff;
@@ -278,20 +266,6 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 6px;
-        }
-
-        /* Pricing Cards */
-        .plan-card {
-            background: #222430;
-            border: 1px solid #3e4259;
-            border-radius: 14px;
-            padding: 18px;
-            margin-bottom: 12px;
-            text-align: center;
-        }
-        .plan-card.premium {
-            border: 2px solid #ffd200;
-            background: linear-gradient(135deg, #222430, #1d1f2b);
         }
 
         .donate-card {
@@ -322,7 +296,6 @@
             cursor: pointer;
         }
 
-        /* MODAL STYLING */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -402,7 +375,6 @@
             font-weight: 800;
         }
 
-        /* CUSTOM ALERT */
         .custom-alert-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -437,14 +409,12 @@
 </head>
 <body>
 
-    <!-- Header Bar -->
     <div class="header-bar">
         <div class="header-left">
             <button class="menu-btn" onclick="openSidebar(); playSound('sidebar');">☰</button>
             <img class="app-logo-img header-logo" alt="App Logo">
             <div class="header-title" id="pageTitle">Voice Translator</div>
         </div>
-        <!-- UI Language Selector -->
         <select id="uiLangSelect" onchange="changeUILanguage(this.value); playSound('button');" style="padding: 4px 8px; font-size: 11px; margin: 0; width: auto; background: #252734; color: #00f2fe; border-color: #3e4259;">
             <option value="en">🌐 English</option>
             <option value="ur">🇵🇰 اردو</option>
@@ -459,7 +429,6 @@
         </select>
     </div>
 
-    <!-- Overlay & Sidebar Drawer -->
     <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -470,19 +439,17 @@
             <li id="menuVoice" class="active" onclick="switchPage('voice'); playSound('sidebar');"><span class="emoji-icon">🎙️</span><span class="menu-text" data-i18n="navVoice">Voice Translator</span></li>
             <li id="menuText" onclick="switchPage('text'); playSound('sidebar');"><span class="emoji-icon">✍️</span><span class="menu-text" data-i18n="navText">Text Translator</span></li>
             <li id="menuSaved" onclick="switchPage('saved'); playSound('sidebar');"><span class="emoji-icon">⭐</span><span class="menu-text" data-i18n="navSaved">Saved Phrases</span></li>
-            <li id="menuChat" onclick="switchPage('chat'); playSound('sidebar');"><span class="emoji-icon">🗣️</span><span class="menu-text" data-i18n="navChat">2-Way Chat</span> <span id="chatBadge" style="font-size:10px; background:#ff0050; padding:2px 6px; border-radius:4px; color:#fff; margin-left:auto;">2 Free</span></li>
-            <li id="menuCamera" onclick="switchPage('camera'); playSound('sidebar');"><span class="emoji-icon">📷</span><span class="menu-text" data-i18n="navCamera">Camera OCR</span> <span id="camBadge" style="font-size:10px; background:#ff0050; padding:2px 6px; border-radius:4px; color:#fff; margin-left:auto;">2 Free</span></li>
-            <li id="menuPlans" onclick="switchPage('plans'); playSound('sidebar');"><span class="emoji-icon">👑</span><span class="menu-text" data-i18n="navPlans">Plans & Premium</span></li>
-            <li id="menuDonate" onclick="switchPage('donate'); playSound('sidebar');"><span class="emoji-icon">💳</span><span class="menu-text" data-i18n="navDonate">Payment & Activation</span></li>
+            <li id="menuChat" onclick="switchPage('chat'); playSound('sidebar');"><span class="emoji-icon">🗣️</span><span class="menu-text" data-i18n="navChat">2-Way Chat</span></li>
+            <li id="menuCamera" onclick="switchPage('camera'); playSound('sidebar');"><span class="emoji-icon">📷</span><span class="menu-text" data-i18n="navCamera">Camera OCR</span></li>
+            <li id="menuDonate" onclick="switchPage('donate'); playSound('sidebar');"><span class="emoji-icon">💳</span><span class="menu-text" data-i18n="navDonate">Donation</span></li>
             <li id="menuReport" onclick="switchPage('report'); playSound('sidebar');"><span class="emoji-icon">🛠️</span><span class="menu-text" data-i18n="navReport">Report Problem</span></li>
             <li id="menuAbout" onclick="switchPage('about'); playSound('sidebar');"><span class="emoji-icon">ℹ️</span><span class="menu-text" data-i18n="navAbout">About App</span></li>
         </ul>
     </div>
 
-    <!-- Main Content Container -->
     <div class="container">
 
-        <!-- ================= PAGE 1: VOICE TRANSLATOR ================= -->
+        <!-- VOICE TRANSLATOR -->
         <div id="voiceSection" class="section-page active-page">
             <label data-i18n="lblInputLang">Input Language:</label>
             <button class="lang-trigger-btn" id="voiceInputBtn" onclick="openLangModal('voice_input'); playSound('button');">
@@ -503,7 +470,7 @@
             <button class="anim-btn" onclick="saveCurrentTranslation('voiceInputText', 'voiceOutputText'); playSound('button');" style="background: linear-gradient(135deg, #f12711, #f5af19); margin-top: 10px;" data-i18n="btnSave">⭐ SAVE TO FAVORITES</button>
         </div>
 
-        <!-- ================= PAGE 2: TEXT TRANSLATOR ================= -->
+        <!-- TEXT TRANSLATOR -->
         <div id="textSection" class="section-page">
             <label data-i18n="lblSourceLang">Source Language:</label>
             <button class="lang-trigger-btn" id="textInputBtn" onclick="openLangModal('text_input'); playSound('button');">
@@ -525,7 +492,7 @@
             <button class="anim-btn" onclick="saveCurrentTranslation('textInputText', 'textOutputText'); playSound('button');" style="background: linear-gradient(135deg, #f12711, #f5af19); margin-top: 10px;" data-i18n="btnSave">⭐ SAVE TO FAVORITES</button>
         </div>
 
-        <!-- ================= PAGE 3: SAVED PHRASES ================= -->
+        <!-- SAVED PHRASES -->
         <div id="savedSection" class="section-page">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                 <h3 style="color: #00f2fe; font-size: 16px; font-weight: 800;" data-i18n="navSaved">⭐ Saved Phrases</h3>
@@ -534,11 +501,11 @@
             <div id="savedListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto;"></div>
         </div>
 
-        <!-- ================= PAGE 4: 2-WAY CHAT ================= -->
+        <!-- 2-WAY CHAT -->
         <div id="chatSection" class="section-page">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <h3 style="color: #00f2fe; font-size: 16px; font-weight: 800;" data-i18n="chatHeader">🗣️ 2-Way Live Conversation</h3>
-                <span id="chatRemainingCount" style="font-size: 11px; color: #ffd200; background: #252734; padding: 3px 8px; border-radius: 6px; border: 1px solid #3e4259;">2 Uses Left</span>
+                <span style="font-size: 11px; color: #00f2fe; background: #252734; padding: 3px 8px; border-radius: 6px; border: 1px solid #3e4259;">Free Unlimited</span>
             </div>
             
             <div style="background: #222430; padding: 14px; border-radius: 12px; border: 1px solid #3e4259; margin-bottom: 12px;">
@@ -564,11 +531,11 @@
             </div>
         </div>
 
-        <!-- ================= PAGE 5: CAMERA OCR TRANSLATOR ================= -->
+        <!-- CAMERA OCR TRANSLATOR -->
         <div id="cameraSection" class="section-page">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <h3 style="color: #00f2fe; font-size: 16px; font-weight: 800;" data-i18n="camHeader">📷 Camera OCR Translator</h3>
-                <span id="camRemainingCount" style="font-size: 11px; color: #ffd200; background: #252734; padding: 3px 8px; border-radius: 6px; border: 1px solid #3e4259;">2 Uses Left</span>
+                <span style="font-size: 11px; color: #00f2fe; background: #252734; padding: 3px 8px; border-radius: 6px; border: 1px solid #3e4259;">Free AI OCR</span>
             </div>
 
             <label data-i18n="lblSourceLang">Source Language (Image Text):</label>
@@ -589,46 +556,21 @@
                     <button class="anim-btn btn-text-translate" onclick="triggerCameraFeature(); playSound('button');" style="margin-top: 0; font-size: 12px; padding: 10px;" data-i18n="takePhoto">📷 Take Live Photo</button>
                     <button class="anim-btn btn-mic-anim" onclick="triggerCameraFeature('gallery'); playSound('button');" style="margin-top: 0; font-size: 12px; padding: 10px;" data-i18n="chooseGallery">📁 Choose Gallery</button>
                 </div>
-                <div id="imagePreviewContainer" style="margin-top: 12px;"></div>
+                
+                <div id="imagePreviewContainer" style="margin-top: 14px; position: relative; display: inline-block; width: 100%;"></div>
             </div>
-            <label data-i18n="lblExtracted">Extracted Result:</label>
-            <div id="imageOutputText" class="result-box" style="font-size: 13px;" data-i18n="scanPrompt">Upload or snap an image to scan...</div>
+
+            <!-- Refresh / Re-translate Button -->
+            <button class="anim-btn" onclick="retriggerOCR(); playSound('button');" style="background: linear-gradient(135deg, #00c6ff, #0072ff); margin-top: 12px; font-size: 13px; padding: 10px;">🔄 Refresh & Re-Translate Image</button>
+
+            <label data-i18n="lblExtracted">AI OCR & Translation Result:</label>
+            <div id="imageOutputText" class="result-box" style="font-size: 14px;" data-i18n="scanPrompt">Upload an image to automatically detect and translate text...</div>
         </div>
 
-        <!-- ================= PAGE 6: PLANS & PREMIUM SUBSCRIPTION ================= -->
-        <div id="plansSection" class="section-page">
-            <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;" data-i18n="plansHeader">👑 Choose Your Plan</h3>
-            <p style="font-size: 13px; color: #b0b3c2; margin-bottom: 15px;" data-i18n="plansSub">Unlock unlimited features and remove ads forever!</p>
-
-            <div class="plan-card">
-                <div style="font-size: 16px; font-weight: bold; color: #fff;" data-i18n="freePlanTitle">Free Plan</div>
-                <div style="font-size: 22px; font-weight: 800; color: #00f2fe; margin: 6px 0;">$0 / Rs. 0 <span style="font-size:11px; color:#aaa;" data-i18n="forever">/ forever</span></div>
-                <ul style="text-align: left; font-size: 12px; color: #b0b3c2; list-style: inside; margin: 10px 0; display: flex; flex-direction: column; gap: 4px;">
-                    <li data-i18n="f1">Voice & Text Translator (Unlimited)</li>
-                    <li data-i18n="f2">2-Way Chat (Only 2 uses / week)</li>
-                    <li data-i18n="f3">Camera OCR (Only 2 uses / week)</li>
-                    <li data-i18n="f4">Contains Ads</li>
-                </ul>
-                <button class="anim-btn" style="background: #252734; border: 1px solid #3e4259; cursor: default;" data-i18n="currentPlan">CURRENT PLAN</button>
-            </div>
-
-            <div class="plan-card premium">
-                <div style="font-size: 16px; font-weight: bold; color: #ffd200;" data-i18n="proPlanTitle">⭐ Premium Pro Plan</div>
-                <div style="font-size: 22px; font-weight: 800; color: #ffd200; margin: 6px 0;">$1 / Rs. 280 <span style="font-size:11px; color:#aaa;" data-i18n="monthly">/ month</span></div>
-                <ul style="text-align: left; font-size: 12px; color: #f1f1f1; list-style: inside; margin: 10px 0; display: flex; flex-direction: column; gap: 4px;">
-                    <li data-i18n="p1"><b>Unlimited 2-Way Live Chat</b></li>
-                    <li data-i18n="p2"><b>Unlimited Camera OCR Scans</b></li>
-                    <li data-i18n="p3"><b>100% Ad-Free Experience</b></li>
-                    <li data-i18n="p4">Priority AI Support</li>
-                </ul>
-                <button class="anim-btn btn-premium-gold" onclick="switchPage('donate'); playSound('button');" data-i18n="upgradeBtn">🚀 UPGRADE TO PREMIUM</button>
-            </div>
-        </div>
-
-        <!-- ================= PAGE 7: PAYMENT & ACTIVATION ================= -->
+        <!-- DONATION PAGE -->
         <div id="donateSection" class="section-page">
-            <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;" data-i18n="payHeader">💳 Payment & Activation Options</h3>
-            <p style="font-size: 13px; color: #b0b3c2; margin-bottom: 12px;" data-i18n="paySub">Select payment option below and pay via app:</p>
+            <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;" data-i18n="donateHeader">💳 Support & Donation</h3>
+            <p style="font-size: 13px; color: #b0b3c2; margin-bottom: 12px;" data-i18n="donateSub">If you like this app, you can support us by donating below:</p>
 
             <div class="donate-card">
                 <div class="donate-card-title">
@@ -656,17 +598,9 @@
                 <div style="font-size: 12px; color: #ffffff; margin-top: 4px;"><b>Binance Pay ID / USDT (TRC20):</b> 123456789</div>
                 <button class="btn-pay-action" onclick="openPaymentApp('binance'); playSound('button');">🟡 Pay via Binance App</button>
             </div>
-
-            <!-- FIREBASE CLOUD KEYS ACTIVATION BOX -->
-            <div style="margin-top: 15px; background: #161823; padding: 14px; border-radius: 12px; border: 1px solid #ffd200;">
-                <div style="font-size: 13px; color: #ffd200; font-weight: bold; margin-bottom: 4px;">🔑 Enter Firebase Cloud Pro Key:</div>
-                <div style="font-size: 11px; color: #a0a0ab; margin-bottom: 8px;">(Verified online instantly via Cloud Database)</div>
-                <input type="text" id="activationKeyInput" placeholder="Enter key (e.g. GC-VIP-2026)" style="margin-bottom: 8px;">
-                <button class="anim-btn btn-premium-gold" onclick="verifyFirebaseKey(); playSound('button');" style="margin-top: 0; padding: 10px; font-size: 12px;">✅ ACTIVATE 30-DAY PRO</button>
-            </div>
         </div>
 
-        <!-- ================= PAGE 8: REPORT PROBLEM ================= -->
+        <!-- REPORT PROBLEM -->
         <div id="reportSection" class="section-page">
             <h3 style="color: #00f2fe; margin-bottom: 8px; font-size: 18px;" data-i18n="reportHeader">Report Problem 🛠️</h3>
             <form id="reportForm" action="https://formspree.io/f/maqrbyoq" method="POST" onsubmit="submitReportForm(event)" style="display: flex; flex-direction: column; gap: 12px; background: #222430; padding: 18px; border-radius: 12px;">
@@ -677,13 +611,13 @@
             </form>
         </div>
 
-        <!-- ================= PAGE 9: ABOUT APP ================= -->
+        <!-- ABOUT APP -->
         <div id="aboutSection" class="section-page">
             <div class="about-logo-box">
                 <img class="app-logo-img" alt="App Logo">
                 <div>
                     <h3 style="color: #00f2fe; font-size: 18px;">Universal AI Translator</h3>
-                    <span style="font-size: 11px; color: #a0a0ab;">v1.0.0 (Pro Edition)</span>
+                    <span style="font-size: 11px; color: #a0a0ab;">v1.0.0 (Free Edition)</span>
                 </div>
             </div>
             <div style="border-top: 1px solid #282a36; padding-top: 12px; font-size: 13px; color: #b0b3c2; line-height: 1.5; margin-bottom: 12px;" data-i18n="aboutDesc">
@@ -720,7 +654,6 @@
     </div>
 
     <script>
-        // ================= SATISFYING SOUND EFFECTS GENERATOR (Web Audio API) =================
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(type) {
@@ -759,27 +692,11 @@
             }
         }
 
-        // ================= FIREBASE CONFIGURATION (CONNECTED FROM SCREENSHOT) =================
-        const firebaseConfig = {
-            apiKey: "AIzaSyArQtWOUbxe6tXIRoqfhI4EAzVCcrdVmf8",
-            authDomain: "universal-ai-translator-99172.firebaseapp.com",
-            databaseURL: "https://universal-ai-translator-99172-default-rtdb.firebaseio.com",
-            projectId: "universal-ai-translator-99172",
-            storageBucket: "universal-ai-translator-99172.firebasestorage.app",
-            messagingSenderId: "503502551369",
-            appId: "1:503502551369:web:9cf0ed9d68fe87f1b10298",
-            measurementId: "G-JDJ35GCHB0"
-        };
-
-        // Initialize Firebase Compat
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
         const uiTranslations = {
             en: {
                 navVoice: "Voice Translator", navText: "Text Translator", navSaved: "Saved Phrases",
-                navChat: "2-Way Chat", navCamera: "Camera OCR", navPlans: "Plans & Premium",
-                navDonate: "Payment & Activation", navReport: "Report Bug", navAbout: "About App",
+                navChat: "2-Way Chat", navCamera: "Camera OCR", navDonate: "Donation",
+                navReport: "Report Bug", navAbout: "About App",
                 lblInputLang: "Input Language:", lblOutputLang: "Target Language (Output):",
                 lblSourceLang: "Source Language:", lblTypeText: "Type Your Text:",
                 lblRecognized: "Recognized Speech Text:", lblResult: "Translation Result:",
@@ -791,26 +708,20 @@
                 speakP1: "🎙️ Speak Person 1", speakP2: "🎙️ Speak Person 2",
                 camHeader: "📷 Camera OCR Translator", takePhoto: "📷 Take Live Photo",
                 chooseGallery: "📁 Choose Gallery", lblExtracted: "Extracted Result:",
-                scanPrompt: "Upload or snap an image to scan...", plansHeader: "👑 Choose Your Plan",
-                plansSub: "Unlock unlimited features and remove ads forever!", freePlanTitle: "Free Plan",
-                forever: "/ forever", f1: "Voice & Text Translator (Unlimited)", f2: "2-Way Chat (Only 2 uses / week)",
-                f3: "Camera OCR (Only 2 uses / week)", f4: "Contains Ads", currentPlan: "CURRENT PLAN",
-                proPlanTitle: "⭐ Premium Pro Plan", monthly: "/ month", p1: "Unlimited 2-Way Live Chat",
-                p2: "Unlimited Camera OCR Scans", p3: "100% Ad-Free Experience", p4: "Priority AI Support",
-                upgradeBtn: "🚀 UPGRADE TO PREMIUM", payHeader: "💳 Payment & Activation Options",
-                paySub: "Select payment option below and pay via app:",
+                scanPrompt: "Upload an image to automatically detect and translate text...", donateHeader: "💳 Support & Donation",
+                donateSub: "If you like this app, you can support us by donating below:",
                 reportHeader: "Report Problem 🛠️", phName: "Your name...", phEmail: "Your email...",
                 phIssue: "Describe issue...", btnSubmit: "📩 SUBMIT REPORT", devName: "Developer: GAMERS CLUB TECH",
                 devEmail: "Support Email: ninjgamer1234@gmail.com", modalLangTitle: "Select Language",
                 phSearchLang: "🔍 Search language...", btnGotIt: "GOT IT",
-                aboutDesc: "Universal AI Translator is a fast and powerful translation application that provides seamless voice, text, camera OCR, and live 2-way conversation features. Designed for modern users, it helps you easily translate any language with high accuracy and a smooth user experience."
+                aboutDesc: "Universal AI Translator is a fast and powerful translation application that provides seamless voice, text, camera OCR, and live 2-way conversation features."
             },
             ur: {
                 navVoice: "آواز کا ترجمہ", navText: "متن کا ترجمہ", navSaved: "محفوظ شدہ جملے",
-                navChat: "دو طرفہ بات چیت", navCamera: "کیمرہ اسکینر", navPlans: "پلانز اور پریمیم",
-                navDonate: "ادائیگی اور ایکٹیویشن", navReport: "بگ رپورٹ کریں", navAbout: "ایپ کے بارے میں",
+                navChat: "دو طرفہ بات چیت", navCamera: "کیمرہ اسکینر", navDonate: "عطیہ (Donation)",
+                navReport: "بگ رپورٹ کریں", navAbout: "ایپ کے بارے میں",
                 lblInputLang: "ان پٹ زبان:", lblOutputLang: "ٹارگٹ زبان (آؤٹ پٹ):",
-                lblSourceLang: "زبان منتخب کریں:", lblTypeText: "अपना متن درج کریں:",
+                lblSourceLang: "زبان منتخب کریں:", lblTypeText: "اپنا متن درج کریں:",
                 lblRecognized: "پہچانی گئی آواز:", lblResult: "ترجمہ کا نتیجہ:",
                 btnTranslate: "⚡ ترجمہ کریں", btnSave: "⭐ پسندیدہ میں محفوظ کریں",
                 btnSpeak: "🎤 بولنے کے لیے ٹیپ کریں", phVoiceInput: "آپ کی بولی گئی آواز یہاں آئے گی...",
@@ -820,244 +731,12 @@
                 speakP1: "🎙️ شخص 1 بولے", speakP2: "🎙️ شخص 2 بولے",
                 camHeader: "📷 کیمرہ OCR اسکینر", takePhoto: "📷 لائیو فوٹو کھینچیں",
                 chooseGallery: "📁 گیلری سے منتخب کریں", lblExtracted: "اسکین شدہ نتیجہ:",
-                scanPrompt: "اسکین کرنے کے لیے تصویر اپ لوڈ یا کیپچر کریں...", plansHeader: "👑 اپنا پلان منتخب کریں",
-                plansSub: "تمام فیچرز انلاک کریں اور اشتہارات ہمیشہ کے لیے ختم کریں!", freePlanTitle: "فری پلان",
-                forever: "/ ہمیشہ کے لیے", f1: "آواز اور متن کا ترجمہ (لامحدود)", f2: "دو طرفہ چیٹ (ہفتے میں صرف 2 بار)",
-                f3: "کیمرہ اسکین (ہفتے میں صرف 2 بار)", f4: "اشتہارات شامل ہیں", currentPlan: "موجودہ پلان",
-                proPlanTitle: "⭐ پریمیم پرو پلان", monthly: "/ ماہانہ", p1: "لامحدود دو طرفہ لائیو چیٹ",
-                p2: "لامحدود کیمرہ OCR اسکین", p3: "100% اشتہار سے پاک تجربہ", p4: "ترجیحی AI سپورٹ",
-                upgradeBtn: "🚀 پریمیم میں اپ گریڈ کریں", payHeader: "💳 ادائیگی کے طریقے",
-                paySub: "نیچے دیے گئے آپشن سے ایپ کے ذریعے پیمنٹ کریں:",
+                scanPrompt: "تصویر اپ لوڈ کریں تاکہ AI خود بخود متن تلاش کر کے ترجمہ کرے...", donateHeader: "💳 سپورٹ اور ڈونیشن",
+                donateSub: "اگر آپ کو یہ ایپ پسند ہے تو آپ نیچے دیے گئے ذرائع سے سپورٹ کر سکتے ہیں:",
                 reportHeader: "مسئلہ رپورٹ کریں 🛠️", phName: "آپ کا نام...", phEmail: "آپ کا ای میل...",
                 phIssue: "مسئلہ بیان کریں...", btnSubmit: "📩 رپورٹ جمع کریں", devName: "ڈویلپر: GAMERS CLUB TECH",
                 devEmail: "سپورٹ ای میل: ninjgamer1234@gmail.com", modalLangTitle: "زبان منتخب کریں",
-                phSearchLang: "🔍 زبان تلاش کریں...", btnGotIt: "سمجھ گئے",
-                aboutDesc: "Universal AI Translator aik behtareen aur fast translator app hai jo voice, text, camera OCR aur live 2-way conversation ki sahulat faraham karti hai."
-            },
-            hi: {
-                navVoice: "आवाज अनुवादक", navText: "पाठ अनुवादक", navSaved: "सहेजे गए वाक्यांश",
-                navChat: "दो-तरफ़ा चैट", navCamera: "कैमरा ओसीआर", navPlans: "योजनाएं और प्रीमियम",
-                navDonate: "भुगतान और सक्रियण", navReport: "समस्या रिपोर्ट करें", navAbout: "ऐप के बारे में",
-                lblInputLang: "इनपुट भाषा:", lblOutputLang: "लक्ष्य भाषा (आउटपुट):",
-                lblSourceLang: "स्रोत भाषा:", lblTypeText: "अपना पाठ टाइप करें:",
-                lblRecognized: "पहचाना गया भाषण पाठ:", lblResult: "अनुवाद परिणाम:",
-                btnTranslate: "⚡ पाठ अनुवाद करें", btnSave: "⭐ पसंदीदा में सहेजें",
-                btnSpeak: "🎤 बोलने के लिए टैप करें", phVoiceInput: "आपका बोला गया पाठ यहाँ दिखाई देगा...",
-                phTypeText: "अनुवाद के लिए यहाँ टाइप करें...", resDefault: "परिणाम यहाँ दिखाई देगा...",
-                btnClearAll: "सभी साफ़ करें", chatHeader: "🗣️ दो-तरफ़ा लाइव बातचीत",
-                person1: "व्यक्ति 1:", person2: "व्यक्ति 2:", tapMic: "मिक टैप करें...",
-                speakP1: "🎙️ व्यक्ति 1 बोलें", speakP2: "🎙️ व्यक्ति 2 बोलें",
-                camHeader: "📷 कैमरा ओसीआर अनुवादक", takePhoto: "📷 लाइव फोटो लें",
-                chooseGallery: "📁 गैलरी चुनें", lblExtracted: "निकाला गया परिणाम:",
-                scanPrompt: "स्कैन करने के लिए छवि अपलोड या कैप्चर करें...", plansHeader: "👑 अपनी योजना चुनें",
-                plansSub: "असीमित सुविधाएँ अनलॉक करें और विज्ञापन हमेशा के लिए हटाएं!", freePlanTitle: "मुफ़्त योजना",
-                forever: "/ हमेशा के लिए", f1: "आवाज और पाठ अनुवादक (असीमित)", f2: "दो-तरफ़ा चैट (सप्ताह में केवल 2 बार)",
-                f3: "कैमरा ओसीआर (सप्ताह में केवल 2 बार)", f4: "विज्ञापन शामिल हैं", currentPlan: "वर्तमान योजना",
-                proPlanTitle: "⭐ प्रीमियम प्रो योजना", monthly: "/ महीना", p1: "असीमित दो-तरफ़ा लाइव चैट",
-                p2: "असीमित कैमरा ओसीआर स्कैन", p3: "100% विज्ञापन-मुक्त अनुभव", p4: "प्राथमिकता AI समर्थन",
-                upgradeBtn: "🚀 प्रीमियम में अपग्रेड करें", payHeader: "💳 भुगतान विकल्प",
-                paySub: "नीचे दिया गया भुगतान विकल्प चुनें:",
-                reportHeader: "समस्या रिपोर्ट करें 🛠️", phName: "आपका नाम...", phEmail: "आपका ईमेल...",
-                phIssue: "समस्या का वर्णन करें...", btnSubmit: "📩 रिपोर्ट जमा करें", devName: "डेवलपर: GAMERS CLUB TECH",
-                devEmail: "समर्थन ईमेल: ninjgamer1234@gmail.com", modalLangTitle: "भाषा चुनें",
-                phSearchLang: "🔍 भाषा खोजें...", btnGotIt: "समझ गया",
-                aboutDesc: "Universal AI Translator ek tez aur shaktishali anuvad application hai jo voice, text, camera OCR aur live 2-way conversation ki suvidha deti hai."
-            },
-            es: {
-                navVoice: "Traductor de Voz", navText: "Traductor de Texto", navSaved: "Frases Guardadas",
-                navChat: "Chat Bidireccional", navCamera: "Cámara OCR", navPlans: "Planes y Premium",
-                navDonate: "Pago y Activación", navReport: "Reportar Error", navAbout: "Acerca de",
-                lblInputLang: "Idioma de entrada:", lblOutputLang: "Idioma de salida:",
-                lblSourceLang: "Idioma de origen:", lblTypeText: "Escribe tu texto:",
-                lblRecognized: "Texto reconocido:", lblResult: "Resultado de traducción:",
-                btnTranslate: "⚡ TRADUCIR TEXTO", btnSave: "⭐ GUARDAR EN FAVORITOS",
-                btnSpeak: "🎤 TOQUE PARA HABLAR", phVoiceInput: "Tu texto hablado aparecerá aquí...",
-                phTypeText: "Escribe aquí para traducir...", resDefault: "El resultado aparecerá aquí...",
-                btnClearAll: "Borrar Todo", chatHeader: "🗣️ Conversación en Vivo",
-                person1: "PERSONA 1:", person2: "PERSONA 2:", tapMic: "Toca el micrófono...",
-                speakP1: "🎙️ Hablar Persona 1", speakP2: "🎙️ Hablar Persona 2",
-                camHeader: "📷 Traductor OCR de Cámara", takePhoto: "📷 Tomar Foto",
-                chooseGallery: "📁 Elegir Galería", lblExtracted: "Resultado Extraído:",
-                scanPrompt: "Sube o toma una foto para escanear...", plansHeader: "👑 Elige tu Plan",
-                plansSub: "¡Desbloquea funciones ilimitadas y elimina anuncios para siempre!", freePlanTitle: "Plan Gratuito",
-                forever: "/ para siempre", f1: "Traductor de Voz y Texto (Ilimitado)", f2: "Chat Bidireccional (2 usos / semana)",
-                f3: "Cámara OCR (2 usos / semana)", f4: "Contiene anuncios", currentPlan: "PLAN ACTUAL",
-                proPlanTitle: "⭐ Plan Pro Premium", monthly: "/ mes", p1: "Chat en Vivo Bidireccional Ilimitado",
-                p2: "Escaneos OCR de Cámara Ilimitados", p3: "Experiencia 100% sin Anuncios", p4: "Soporte AI Prioritario",
-                upgradeBtn: "🚀 ACTUALIZAR A PREMIUM", payHeader: "💳 Opciones de Pago y Activación",
-                paySub: "Seleccione una opción de pago a continuación:",
-                reportHeader: "Reportar Problema 🛠️", phName: "Tu nombre...", phEmail: "Tu correo...",
-                phIssue: "Describe el problema...", btnSubmit: "📩 ENVIAR REPORTE", devName: "Desarrollador: GAMERS CLUB TECH",
-                devEmail: "Correo de Soporte: ninjgamer1234@gmail.com", modalLangTitle: "Seleccionar Idioma",
-                phSearchLang: "🔍 Buscar idioma...", btnGotIt: "ENTENDIDO"
-            },
-            ar: {
-                navVoice: "مترجم الصوت", navText: "مترجم النصوص", navSaved: "العبارات المحفوظة",
-                navChat: "محادثة ثنائية الاتجاه", navCamera: "ماسح الكاميرا", navPlans: "الخطط والتميز",
-                navDonate: "الدفع والتنشيط", navReport: "الإبلاغ عن مشكلة", navAbout: "عن التطبيق",
-                lblInputLang: "لغة الإدخال:", lblOutputLang: "لغة الإخراج:",
-                lblSourceLang: "لغة المصدر:", lblTypeText: "اكتب النص هنا:",
-                lblRecognized: "النص الصوتي التعرف عليه:", lblResult: "نتيجة الترجمة:",
-                btnTranslate: "⚡ ترجمة النص", btnSave: "⭐ حفظ في المفضلة",
-                btnSpeak: "🎤 اضغط للتحدث", phVoiceInput: "سيظهر النص المنطوق هنا...",
-                phTypeText: "اكتب هنا للترجمة...", resDefault: "ستظهر النتيجة هنا...",
-                btnClearAll: "مسح الكل", chatHeader: "🗣️ محادثة حية ثنائية الاتجاه",
-                person1: "الشخص 1:", person2: "الشخص 2:", tapMic: "اضغط على الميكروفون...",
-                speakP1: "🎙️ تحدث الشخص 1", speakP2: "🎙️ تحدث الشخص 2",
-                camHeader: "📷 مترجم الكاميرا", takePhoto: "📷 التقاط صورة",
-                chooseGallery: "📁 اختيار من المعرض", lblExtracted: "النتيجة المستخرجة:",
-                scanPrompt: "قم بتحميل أو التقاط صورة للمسح...", plansHeader: "👑 اختر خطتك",
-                plansSub: "افتح ميزات غير محدودة وأزل الإعلانات للأبد!", freePlanTitle: "الخطة المجانية",
-                forever: "/ للأبد", f1: "مترجم الصوت والنص (غير محدود)", f2: "محادثة ثنائية (استخدامان فقط / أسبوع)",
-                f3: "ماسح الكاميرا (استخدامان فقط / أسبوع)", f4: "يحتوي على إعلانات", currentPlan: "الخطة الحالية",
-                proPlanTitle: "⭐ خطة المحترفين المميزة", monthly: "/ شهرياً", p1: "محادثة حية ثنائية غير محدودة",
-                p2: "مسح كاميرا OCR غير محدود", p3: "تجربة خالية من الإعلانات 100%", p4: "دعم ذكاء اصطناعي أولوية",
-                upgradeBtn: "🚀 الترقية إلى المميز", payHeader: "💳 خيارات الدفع والتنشيط",
-                paySub: "اختر خيار الدفع أدناه:",
-                reportHeader: "الإبلاغ عن مشكلة 🛠️", phName: "اسمك...", phEmail: "بريدك الإلكتروني...",
-                phIssue: "صف المشكلة...", btnSubmit: "📩 إرسال التقرير", devName: "المطور: GAMERS CLUB TECH",
-                devEmail: "بريد الدعم: ninjgamer1234@gmail.com", modalLangTitle: "اختر اللغة",
-                phSearchLang: "🔍 ابحث عن لغة...", btnGotIt: "حسناً"
-            },
-            fr: {
-                navVoice: "Traducteur Vocal", navText: "Traducteur de Texte", navSaved: "Phrases Enregistrées",
-                navChat: "Chat Bidirectionnel", navCamera: "OCR Caméra", navPlans: "Plans et Premium",
-                navDonate: "Paiement et Activation", navReport: "Signaler un Bug", navAbout: "À propos",
-                lblInputLang: "Langue d'entrée :", lblOutputLang: "Langue cible (Sortie) :",
-                lblSourceLang: "Langue source :", lblTypeText: "Tapez votre texte :",
-                lblRecognized: "Texte reconnu :", lblResult: "Résultat de la traduction :",
-                btnTranslate: "⚡ TRADUIRE LE TEXTE", btnSave: "⭐ SAUVEGARDER",
-                btnSpeak: "🎤 APPUYEZ POUR PARLER", phVoiceInput: "Votre texte parlé apparaîtra ici...",
-                phTypeText: "Tapez ici pour traduire...", resDefault: "Le résultat apparaîtra ici...",
-                btnClearAll: "Tout Effacer", chatHeader: "🗣️ Conversation en direct",
-                person1: "PERSONNE 1 :", person2: "PERSONNE 2 :", tapMic: "Appuyez sur le micro...",
-                speakP1: "🎙️ Parler Personne 1", speakP2: "🎙️ Parler Personne 2",
-                camHeader: "📷 Traducteur OCR Caméra", takePhoto: "📷 Prendre une photo",
-                chooseGallery: "📁 Choisir la galerie", lblExtracted: "Résultat extrait :",
-                scanPrompt: "Téléchargez ou prenez une photo pour scanner...", plansHeader: "👑 Choisissez votre plan",
-                plansSub: "Débloquez des fonctionnalités illimitées et supprimez les pubs !", freePlanTitle: "Plan Gratuit",
-                forever: "/ pour toujours", f1: "Traducteur Voix & Texte (Illimitacé)", f2: "Chat Bidirectionnel (2 utilisations / sem.)",
-                f3: "Caméra OCR (2 utilisations / sem.)", f4: "Contient des pubs", currentPlan: "PLAN ACTUEL",
-                proPlanTitle: "⭐ Plan Pro Premium", monthly: "/ mois", p1: "Chat en direct illimité",
-                p2: "Scans OCR caméra illimités", p3: "Expérience 100% sans publicité", p4: "Support IA prioritaire",
-                upgradeBtn: "🚀 PASSER À PREMIUM", payHeader: "💳 Options de Paiement",
-                paySub: "Sélectionnez l'option de paiement ci-dessous :",
-                reportHeader: "Signaler un problème 🛠️", phName: "Votre nom...", phEmail: "Votre email...",
-                phIssue: "Décrivez le problème...", btnSubmit: "📩 SOUMETTRE", devName: "Développeur : GAMERS CLUB TECH",
-                devEmail: "Email de support : ninjgamer1234@gmail.com", modalLangTitle: "Sélectionner la langue",
-                phSearchLang: "🔍 Rechercher...", btnGotIt: "COMPRIS"
-            },
-            de: {
-                navVoice: "Sprachübersetzer", navText: "Textübersetzer", navSaved: "Gespeicherte Phrasen",
-                navChat: "2-Wege-Chat", navCamera: "Kamera-OCR", navPlans: "Pläne & Premium",
-                navDonate: "Zahlung & Aktivierung", navReport: "Fehler melden", navAbout: "Über App",
-                lblInputLang: "Eingabesprache:", lblOutputLang: "Zielsprache (Ausgabe):",
-                lblSourceLang: "Quellsprache:", lblTypeText: "Text eingeben:",
-                lblRecognized: "Ererkannter Sprachtext:", lblResult: "Übersetzungsergebnis:",
-                btnTranslate: "⚡ TEXT ÜBERSETZEN", btnSave: "⭐ SPEICHERN",
-                btnSpeak: "🎤 ZUM SPRECHEN TIPPEN", phVoiceInput: "Ihr gesprochener Text erscheint hier...",
-                phTypeText: "Zum Übersetzen hier tippen...", resDefault: "Ergebnis erscheint hier...",
-                btnClearAll: "Alle löschen", chatHeader: "🗣️ 2-Wege-Live-Gespräch",
-                person1: "PERSON 1:", person2: "PERSON 2:", tapMic: "Mikrofon tippen...",
-                speakP1: "🎙️ Person 1 sprechen", speakP2: "🎙️ Person 2 sprechen",
-                camHeader: "📷 Kamera-OCR-Übersetzer", takePhoto: "📷 Live-Foto machen",
-                chooseGallery: "📁 Galerie wählen", lblExtracted: "Extrahierter Text:",
-                scanPrompt: "Bild hochladen oder aufnehmen zum Scannen...", plansHeader: "👑 Wählen Sie Ihren Plan",
-                plansSub: "Unbegrenzte Funktionen freischalten und Werbung entfernen!", freePlanTitle: "Kostenloser Plan",
-                forever: "/ für immer", f1: "Sprach- & Textübersetzer (Unbegrenzt)", f2: "2-Wege-Chat (Nur 2 Nutzungen/Woche)",
-                f3: "Kamera-OCR (Nur 2 Nutzungen/Woche)", f4: "Enthält Werbung", currentPlan: "AKTUELLER PLAN",
-                proPlanTitle: "⭐ Premium Pro Plan", monthly: "/ Monat", p1: "Unbegrenzter 2-Wege-Chat",
-                p2: "Unbegrenzte Kamera-OCR-Scans", p3: "100% werbefreies Erlebnis", p4: "Prioritäts-KI-Support",
-                upgradeBtn: "🚀 AUF PREMIUM UPGRADEN", payHeader: "💳 Zahlungs- & Aktivierungsoptionen",
-                paySub: "Wählen Sie unten eine Zahlungsoption:",
-                reportHeader: "Problem melden 🛠️", phName: "Ihr Name...", phEmail: "Ihre E-Mail...",
-                phIssue: "Problem beschreiben...", btnSubmit: "📩 BERICHT SENDEN", devName: "Entwickler: GAMERS CLUB TECH",
-                devEmail: "Support-E-Mail: ninjgamer1234@gmail.com", modalLangTitle: "Sprache auswählen",
-                phSearchLang: "🔍 Sprache suchen...", btnGotIt: "VERSTANDEN"
-            },
-            tr: {
-                navVoice: "Sesli Çevirmen", navText: "Metin Çevirmeni", navSaved: "Kaydedilenler",
-                navChat: "2 Yönlü Sohbet", navCamera: "Kamera OCR", navPlans: "Planlar ve Premium",
-                navDonate: "Ödeme ve Etkinleştirme", navReport: "Hata Bildir", navAbout: "Hakkında",
-                lblInputLang: "Giriş Dili:", lblOutputLang: "Hedef Dil (Çıkış):",
-                lblSourceLang: "Kaynak Dil:", lblTypeText: "Metninizi Yazın:",
-                lblRecognized: "Tanınan Konuşma Metni:", lblResult: "Çeviri Sonucu:",
-                btnTranslate: "⚡ METNİ ÇEVİR", btnSave: "⭐ FAVORİLERE EKLE",
-                btnSpeak: "🎤 KONUŞMAK İÇİN DOKUN", phVoiceInput: "Konuştuğunuz metin burada görünecek...",
-                phTypeText: "Çevirmek için buraya yazın...", resDefault: "Sonuç burada görünecek...",
-                btnClearAll: "Tümünü Temizle", chatHeader: "🗣️ 2 Yönlü Canlı Sohbet",
-                person1: "1. KİŞİ:", person2: "2. KİŞİ:", tapMic: "Mikrofona dokun...",
-                speakP1: "🎙️ 1. Kişi Konuşsun", speakP2: "🎙️ 2. Kişi Konuşsun",
-                camHeader: "📷 Kamera OCR Çevirmeni", takePhoto: "📷 Canlı Fotoğraf Çek",
-                chooseGallery: "📁 Galeriden Seç", lblExtracted: "Çıkarılan Sonuç:",
-                scanPrompt: "Tarうち için resim yükleyin veya çekin...", plansHeader: "👑 Planınızı Seçin",
-                plansSub: "Sınırsız özelliklerin kilidini açın ve reklamları kaldırın!", freePlanTitle: "Ücretsiz Plan",
-                forever: "/ sonsuza dek", f1: "Ses ve Metin Çevirmeni (Sınırsız)", f2: "2 Yönlü Sohbet (Haftada 2 kullanım)",
-                f3: "Kamera OCR (Haftada 2 kullanım)", f4: "Reklam içerir", currentPlan: "MEVCUT PLAN",
-                proPlanTitle: "⭐ Premium Pro Plan", monthly: "/ ay", p1: "Sınırsız 2 Yönlü Canlı Sohbet",
-                p2: "Sınırsız Kamera OCR Tarama", p3: "%100 Reklamsız Deneyim", p4: "Öncelikli Yapay Zeka Desteği",
-                upgradeBtn: "🚀 PREMIUM'A YÜKSELT", payHeader: "💳 Ödeme ve Etkinleştirme",
-                paySub: "Aşağıdan ödeme seçeneğini seçin:",
-                reportHeader: "Sorun Bildir 🛠️", phName: "Adınız...", phEmail: "E-postanız...",
-                phIssue: "Sorunu açıklayın...", btnSubmit: "📩 RAPOR GÖNDER", devName: "Geliştirici: GAMERS CLUB TECH",
-                devEmail: "Destek E-postası: ninjgamer1234@gmail.com", modalLangTitle: "Dil Seçin",
-                phSearchLang: "🔍 Dil ara...", btnGotIt: "ANLADIM"
-            },
-            zh: {
-                navVoice: "语音翻译", navText: "文本翻译", navSaved: "已保存短语",
-                navChat: "双向实时聊天", navCamera: "相机 OCR", navPlans: "方案与高级版",
-                navDonate: "付款与激活", navReport: "报告问题", navAbout: "关于应用",
-                lblInputLang: "输入语言：", lblOutputLang: "目标语言（输出）：",
-                lblSourceLang: "源语言：", lblTypeText: "输入您的文本：",
-                lblRecognized: "识别的语音文本：", lblResult: "翻译结果：",
-                btnTranslate: "⚡ 翻译文本", btnSave: "⭐ 保存到收藏",
-                btnSpeak: "🎤 点击说话", phVoiceInput: "您所说的文本将显示在这里...",
-                phTypeText: "在此输入以进行翻译...", resDefault: "结果将显示在这里...",
-                btnClearAll: "全部清除", chatHeader: "🗣️ 双向实时对话",
-                person1: "人员 1：", person2: "人员 2：", tapMic: "点击麦克风...",
-                speakP1: "🎙️ 人员 1 讲话", speakP2: "🎙️ 人员 2 讲话",
-                camHeader: "📷 相机 OCR 翻译", takePhoto: "📷 拍照",
-                chooseGallery: "📁 选择相册", lblExtracted: "提取结果：",
-                scanPrompt: "上传或拍摄图片以进行扫描...", plansHeader: "👑 选择您的方案",
-                plansSub: "解锁无限功能并永远移除广告！", freePlanTitle: "免费方案",
-                forever: "/ 永久", f1: "语音和文本翻译（无限）", f2: "双向聊天（每周仅 2 次）",
-                f3: "相机 OCR（每周仅 2 次）", f4: "包含广告", currentPlan: "当前方案",
-                proPlanTitle: "⭐ 高级专业方案", monthly: "/ 月", p1: "无限双向实时聊天",
-                p2: "无限相机 OCR 扫描", p3: "100% 无广告体验", p4: "优先人工智能支持",
-                upgradeBtn: "🚀 升级到高级版", payHeader: "💳 付款与激活选项",
-                paySub: "请在下方选择付款选项：",
-                reportHeader: "报告问题 🛠️", phName: "您的姓名...", phEmail: "您的电子邮箱...",
-                phIssue: "描述问题...", btnSubmit: "📩 提交报告", devName: "开发者：GAMERS CLUB TECH",
-                devEmail: "支持邮箱：ninjgamer1234@gmail.com", modalLangTitle: "选择语言",
-                phSearchLang: "🔍 搜索语言...", btnGotIt: "知道了"
-            },
-            ru: {
-                navVoice: "Голосовой переводчик", navText: "Текстовый переводчик", navSaved: "Сохраненные фразы",
-                navChat: "Двусторонний чат", navCamera: "Камера OCR", navPlans: "Тарифы и Премиум",
-                navDonate: "Оплата и Активация", navReport: "Сообщить об ошибке", navAbout: "О приложении",
-                lblInputLang: "Язык ввода:", lblOutputLang: "Язык перевода (Вывод):",
-                lblSourceLang: "Исходный язык:", lblTypeText: "Введите текст:",
-                lblRecognized: "Распознанный текст:", lblResult: "Результат перевода:",
-                btnTranslate: "⚡ ПЕРЕВЕСТИ ТЕКСТ", btnSave: "⭐ СОХРАНИТЬ",
-                btnSpeak: "🎤 НАЖМИТЕ ДЛЯ ГОВОРА", phVoiceInput: "Ваша речь появится здесь...",
-                phTypeText: "Введите текст для перевода...", resDefault: "Результат появится здесь...",
-                btnClearAll: "Очистить все", chatHeader: "🗣️ Двусторонний диалог",
-                person1: "ЧЕЛОВЕК 1:", person2: "ЧЕЛОВЕК 2:", tapMic: "Нажмите микрофон...",
-                speakP1: "🎙️ Говорит Человек 1", speakP2: "🎙️ Говорит Человек 2",
-                camHeader: "📷 Камера OCR переводчик", takePhoto: "📷 Сделать фото",
-                chooseGallery: "📁 Выбрать галерею", lblExtracted: "Извлеченный текст:",
-                scanPrompt: "Загрузите или сделайте фото для сканирования...", plansHeader: "👑 Выберите тариф",
-                plansSub: "Разблокируйте безлимитный доступ и удалите рекламу!", freePlanTitle: "Бесплатный тариф",
-                forever: "/ навсегда", f1: "Голос и текст (Безлимитно)", f2: "Двусторонний чат (2 раза в неделю)",
-                f3: "Камера OCR (2 раза в неделю)", f4: "Содержит рекламу", currentPlan: "ТЕКУЩИЙ ТАРИФ",
-                proPlanTitle: "⭐ Премиум Про тариф", monthly: "/ месяц", p1: "Безлимитный двусторонний чат",
-                p2: "Безлимитное сканирование OCR", p3: "100% без рекламы", p4: "Приоритетная поддержка",
-                upgradeBtn: "🚀 ОБНОВИТЬ ДО ПРЕМИУМ", payHeader: "💳 Способы оплаты",
-                paySub: "Выберите способ оплаты ниже:",
-                reportHeader: "Сообщить о проблеме 🛠️", phName: "Ваше имя...", phEmail: "Ваш email...",
-                phIssue: "Опишите проблему...", btnSubmit: "📩 ОТПРАВИТЬ", devName: "Разработчик: GAMERS CLUB TECH",
-                devEmail: "Email поддержки: ninjgamer1234@gmail.com", modalLangTitle: "Выберите язык",
-                phSearchLang: "🔍 Поиск языка...", btnGotIt: "ПОНЯТНО"
+                phSearchLang: "🔍 زبان تلاش کریں...", btnGotIt: "سمجھ گئے"
             }
         };
 
@@ -1076,98 +755,54 @@
             });
         }
 
-        function checkDailyWelcomePopup() {
-            const lastOpenDate = localStorage.getItem('last_open_date');
-            const today = new Date().toDateString();
-            if (lastOpenDate !== today) {
-                localStorage.setItem('last_open_date', today);
-                setTimeout(() => {
-                    showCustomAlert("Welcome back! Daily new vocabulary and features are updated. Have a great day translating!", "Daily Greeting ✨", "💡");
-                }, 1000);
-            }
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
-            checkAndExpireSubscription();
             loadSavedPhrases();
-            updateLimitCounters();
-            checkDailyWelcomePopup();
             const savedUILang = localStorage.getItem('ui_lang') || 'en';
             document.getElementById('uiLangSelect').value = savedUILang;
             changeUILanguage(savedUILang);
+            initDuolingoStyleNotifications();
         });
 
-        // ================= FIREBASE REAL-TIME KEY VERIFICATION =================
-        function verifyFirebaseKey() {
-    const userKey = document.getElementById('activationKeyInput').value.trim();
-    
-    if (!userKey) {
-        showCustomAlert("Please enter your activation key!", "Error", "⚠️");
-        return;
-    }
+        // Duolingo Style English Daily Reminder Notification System
+        function initDuolingoStyleNotifications() {
+            if (!("Notification" in window)) return;
 
-    // Aap ki VIP key
-    const validKey = "GC-VIP-2026";
-
-    if (userKey === validKey) {
-        let expiryDate = new Date().getTime() + (30 * 24 * 60 * 60 * 1000);
-        localStorage.setItem('is_premium', 'true');
-        localStorage.setItem('premium_expiry', expiryDate);
-
-        updateLimitCounters();
-        showCustomAlert("Success! Your 30-Day Pro access has been activated.", "Activated! 👑", "🚀");
-        document.getElementById('activationKeyInput').value = '';
-    } else {
-        showCustomAlert("Invalid activation key! Please check the code.", "Invalid Key", "❌");
-    }
-        }
-        
-function verifyFirebaseKey() {
-    const userKey = document.getElementById('activationKeyInput').value.trim();
-    
-
-
-
-
-        function checkAndExpireSubscription() {
-            const expiry = localStorage.getItem('premium_expiry');
-            if (expiry) {
-                const now = new Date().getTime();
-                if (now > parseInt(expiry)) {
-                    localStorage.removeItem('is_premium');
-                    localStorage.removeItem('premium_expiry');
-                }
+            if (Notification.permission === "default") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        showDailyReminderNotification();
+                    }
+                });
+            } else if (Notification.permission === "granted") {
+                checkAndSendDailyReminder();
             }
         }
 
-        function isUserPremium() {
-            checkAndExpireSubscription();
-            return localStorage.getItem('is_premium') === 'true';
+        function checkAndSendDailyReminder() {
+            const lastActiveDate = localStorage.getItem('last_active_date');
+            const today = new Date().toDateString();
+
+            if (lastActiveDate !== today) {
+                // User hasn't opened app today, trigger English reminder notification
+                showDailyReminderNotification();
+            }
+            // Update last active date to today
+            localStorage.setItem('last_active_date', today);
         }
 
-        function updateLimitCounters() {
-            if (isUserPremium()) {
-                document.getElementById('chatBadge').innerText = "PRO";
-                document.getElementById('chatBadge').style.background = "#ffd200";
-                document.getElementById('chatBadge').style.color = "#000";
-                document.getElementById('camBadge').innerText = "PRO";
-                document.getElementById('camBadge').style.background = "#ffd200";
-                document.getElementById('camBadge').style.color = "#000";
-                document.getElementById('chatRemainingCount').innerText = "Unlimited Pro (30 Days)";
-                document.getElementById('camRemainingCount').innerText = "Unlimited Pro (30 Days)";
-                return;
+        function showDailyReminderNotification() {
+            try {
+                const notification = new Notification("🔥 Don't break your streak!", {
+                    body: "Hey Ahmed! Come back to Universal AI Translator and practice your translations today!",
+                    icon: "https://cdn-icons-png.flaticon.com/512/3898/3898082.png"
+                });
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+            } catch(e) {
+                console.log("Notification blocked or unsupported");
             }
-
-            let chatUses = parseInt(localStorage.getItem('chat_uses_count') || '0');
-            let camUses = parseInt(localStorage.getItem('cam_uses_count') || '0');
-            
-            let chatLeft = Math.max(0, 2 - chatUses);
-            let camLeft = Math.max(0, 2 - camUses);
-
-            document.getElementById('chatBadge').innerText = chatLeft + " Free";
-            document.getElementById('camBadge').innerText = camLeft + " Free";
-            document.getElementById('chatRemainingCount').innerText = chatLeft + " Uses Left";
-            document.getElementById('camRemainingCount').innerText = camLeft + " Uses Left";
         }
 
         const logoDataURI = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%233b82f6'/><path d='M20 22 C20 18 24 15 28 15 L52 15 C56 15 60 18 60 22 L60 52 C60 56 56 60 52 60 L38 60 L24 70 L26 60 L20 60 C16 60 12 56 12 52 Z' fill='%23ffffff'/><text x='36' y='46' font-family='Arial, sans-serif' font-weight='bold' font-size='26' fill='%232563eb' text-anchor='middle'>A</text><path d='M40 38 C40 34 44 31 48 31 L72 31 C76 31 80 34 80 38 L80 68 C80 72 76 76 72 76 L66 76 L68 86 L54 76 L48 76 C44 76 40 72 40 68 Z' fill='%23e0e7ff' opacity='0.95'/><text x='60' y='62' font-family='Arial, sans-serif' font-weight='bold' font-size='24' fill='%231e40af' text-anchor='middle'>文</text></svg>";
@@ -1211,28 +846,14 @@ function verifyFirebaseKey() {
         };
         let chatLangs = { 1: { code: 'ur', name: 'URDU' }, 2: { code: 'en', name: 'ENGLISH' } };
 
+        let lastScannedImageSrc = null;
+        let lastScannedText = null;
+
         function openSidebar() { document.getElementById('sidebar').classList.add('active'); document.getElementById('overlay').classList.add('active'); }
         function closeSidebar() { document.getElementById('sidebar').classList.remove('active'); document.getElementById('overlay').classList.remove('active'); }
 
         function switchPage(pageName) {
-            if (!isUserPremium()) {
-                if (pageName === 'chat') {
-                    let uses = parseInt(localStorage.getItem('chat_uses_count') || '0');
-                    if (uses >= 2) {
-                        showCustomAlert("Your weekly free limit for 2-Way Chat has been reached! Please upgrade to the Premium plan for unlimited access.", "Limit Reached!", "👑");
-                        return;
-                    }
-                }
-                if (pageName === 'camera') {
-                    let uses = parseInt(localStorage.getItem('cam_uses_count') || '0');
-                    if (uses >= 2) {
-                        showCustomAlert("Your weekly free limit for Camera OCR has been reached! Please upgrade to the Premium plan for unlimited access.", "Limit Reached!", "👑");
-                        return;
-                    }
-                }
-            }
-
-            const pages = ['voice', 'text', 'saved', 'chat', 'camera', 'plans', 'donate', 'report', 'about'];
+            const pages = ['voice', 'text', 'saved', 'chat', 'camera', 'donate', 'report', 'about'];
             pages.forEach(p => {
                 const sec = document.getElementById(p + 'Section');
                 const menu = document.getElementById('menu' + p.charAt(0).toUpperCase() + p.slice(1));
@@ -1288,7 +909,12 @@ function verifyFirebaseKey() {
                         else if (activeTargetSlot === 'text_input') document.getElementById('textInputLabel').innerText = lang.name;
                         else if (activeTargetSlot === 'text_output') document.getElementById('textOutputLabel').innerText = lang.name;
                         else if (activeTargetSlot === 'cam_input') document.getElementById('camInputLabel').innerText = lang.name;
-                        else if (activeTargetSlot === 'cam_output') document.getElementById('camOutputLabel').innerText = lang.name;
+                        else if (activeTargetSlot === 'cam_output') {
+                            document.getElementById('camOutputLabel').innerText = lang.name;
+                            if (lastScannedText) {
+                                translateCachedText();
+                            }
+                        }
                     }
                     closeLangModal();
                 };
@@ -1402,16 +1028,6 @@ function verifyFirebaseKey() {
         }
 
         function startChatVoice(personNum) {
-            if (!isUserPremium()) {
-                let uses = parseInt(localStorage.getItem('chat_uses_count') || '0');
-                if (uses >= 2) {
-                    showCustomAlert("Your weekly free limit for 2-Way Chat has been reached! Please upgrade to the Premium plan for unlimited access.", "Limit Reached!", "👑");
-                    return;
-                }
-                localStorage.setItem('chat_uses_count', uses + 1);
-                updateLimitCounters();
-            }
-
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 showCustomAlert("Speech recognition is not supported in this browser.", "Not Supported", "⚠️");
@@ -1446,13 +1062,6 @@ function verifyFirebaseKey() {
         }
 
         function triggerCameraFeature(type = 'camera') {
-            if (!isUserPremium()) {
-                let uses = parseInt(localStorage.getItem('cam_uses_count') || '0');
-                if (uses >= 2) {
-                    showCustomAlert("Your weekly free limit for Camera OCR has been reached! Please upgrade to the Premium plan for unlimited access.", "Limit Reached!", "👑");
-                    return;
-                }
-            }
             (type === 'gallery') ? document.getElementById('imageInput').click() : document.getElementById('cameraInput').click();
         }
 
@@ -1460,40 +1069,87 @@ function verifyFirebaseKey() {
             const file = e.target.files[0];
             if(!file) return;
 
-            if (!isUserPremium()) {
-                let uses = parseInt(localStorage.getItem('cam_uses_count') || '0');
-                if (uses >= 2) {
-                    showCustomAlert("Your weekly free limit for Camera OCR has been reached!", "Limit Reached!", "👑");
-                    return;
-                }
-                localStorage.setItem('cam_uses_count', uses + 1);
-                updateLimitCounters();
-            }
-
             const reader = new FileReader();
             reader.onload = async function(evt) {
-                document.getElementById('imagePreviewContainer').innerHTML = `<img src="${evt.target.result}" style="max-width:100%; max-height:140px; border-radius:8px;">`;
-                document.getElementById('imageOutputText').innerText = "Scanning and translating image text...";
+                lastScannedImageSrc = evt.target.result;
+                const previewContainer = document.getElementById('imagePreviewContainer');
+                previewContainer.innerHTML = `
+                    <div style="position: relative; width: 100%; border-radius: 10px; overflow: hidden; background: #000;">
+                        <img src="${lastScannedImageSrc}" style="width: 100%; max-height: 220px; object-fit: contain; display: block; margin: 0 auto;">
+                        <div id="lensOverlayBox" style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0, 0, 0, 0.85); color: #00f2fe; padding: 10px; font-size: 13px; font-weight: bold; text-align: center; border-top: 1px solid #00f2fe;">
+                            🔍 AI Scanning Image for Text... Please wait...
+                        </div>
+                    </div>
+                `;
                 
-                let srcLang = selectedLangs.cam_input.code === 'auto' ? 'auto' : selectedLangs.cam_input.code;
-                let tgtLang = selectedLangs.cam_output.code;
-                
-                setTimeout(async () => {
-                    try {
-                        let sampleText = "Sample OCR scanned text from image";
-                        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${srcLang}&tl=${tgtLang}&dt=t&q=${encodeURIComponent(sampleText)}`);
-                        const data = await res.json();
-                        let translated = "";
-                        if(data && data[0]) {
-                            data[0].forEach(i => { if(i[0]) translated += i[0]; });
-                        }
-                        document.getElementById('imageOutputText').innerText = `Extracted Text: "${sampleText}"\n\nTranslated Result: "${translated}"`;
-                    } catch(err) {
-                        document.getElementById('imageOutputText').innerText = `Extracted Text: "Sample OCR Scanned Data"\n\nTranslated: "Successfully processed image scan."`;
+                document.getElementById('imageOutputText').innerText = "AI OCR is scanning the image text... Please wait...";
+
+                try {
+                    const { data: { text } } = await Tesseract.recognize(lastScannedImageSrc, 'eng+urd', {
+                        logger: m => console.log(m)
+                    });
+
+                    lastScannedText = text ? text.trim() : "";
+                    
+                    if(!lastScannedText || lastScannedText.length < 2) {
+                        document.getElementById('lensOverlayBox').innerHTML = "⚠️ No text found in this image!";
+                        document.getElementById('imageOutputText').innerText = "No text detected in the image. Please upload a clear image containing readable text.";
+                        lastScannedText = null;
+                        return;
                     }
-                }, 1200);
+
+                    await translateCachedText();
+
+                } catch(err) {
+                    document.getElementById('lensOverlayBox').innerHTML = "❌ Error scanning image.";
+                    document.getElementById('imageOutputText').innerText = "Error processing image OCR. Please try another image.";
+                }
             };
             reader.readAsDataURL(file);
+        }
+
+        async function translateCachedText() {
+            if (!lastScannedText) return;
+
+            let srcLang = selectedLangs.cam_input.code === 'auto' ? 'auto' : selectedLangs.cam_input.code;
+            let tgtLang = selectedLangs.cam_output.code;
+
+            try {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${srcLang}&tl=${tgtLang}&dt=t&q=${encodeURIComponent(lastScannedText)}`);
+                const resultData = await res.json();
+                let translated = "";
+                if(resultData && resultData[0]) {
+                    resultData[0].forEach(i => { if(i[0]) translated += i[0]; });
+                }
+
+                const overlay = document.getElementById('lensOverlayBox');
+                if (overlay) {
+                    overlay.innerHTML = `✨ Translation: ${translated}`;
+                }
+                document.getElementById('imageOutputText').innerHTML = `<b>Detected Text:</b> "${lastScannedText}"<br><br><b>AI Translation Result:</b> <span style="color:#00f2fe;">"${translated}"</span>`;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function retriggerOCR() {
+            if (!lastScannedImageSrc) {
+                showCustomAlert("Please upload an image first!", "No Image", "⚠️");
+                return;
+            }
+            document.getElementById('imageOutputText').innerText = "Refreshing & Re-scanning image...";
+            try {
+                const { data: { text } } = await Tesseract.recognize(lastScannedImageSrc, 'eng+urd');
+                lastScannedText = text ? text.trim() : "";
+                if (!lastScannedText) {
+                    document.getElementById('imageOutputText').innerText = "No text found!";
+                    return;
+                }
+                await translateCachedText();
+                showCustomAlert("Image refreshed and translated successfully!", "Refreshed!", "✅");
+            } catch(err) {
+                showCustomAlert("Error refreshing image.", "Error", "❌");
+            }
         }
 
         async function submitReportForm(e) {
